@@ -12,7 +12,7 @@ const KEY_PREFIX_BYTES: &[u8] = "KEY: ".as_bytes();
 const CMD_PREFIX_BYTES: &[u8] = "CMD: ".as_bytes();
 const ARGS_PREFIX_BYTES: &[u8] = "ARGS: ".as_bytes();
 const TTL_PREFIX_BYTES: &[u8] = "TTL: ".as_bytes();
-const SPACE_CHAR: u8 = b' ';
+//const SPACE_CHAR: u8 = b' ';
 
 ///
 ///
@@ -82,7 +82,7 @@ pub fn build_akvp_message(input_data: InputData) -> Vec<u8> {
 
     //
     // Body Separator line
-    message.push(SPACE_CHAR);
+    //message.push(SPACE_CHAR);
     message.push(LINE_FEED);
 
     //

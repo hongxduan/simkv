@@ -35,7 +35,7 @@ impl Command {
 
     pub fn parse_command(message: Vec<u8>) -> Command {
         // Parse AKVP
-        let akvp = AkvpMessage::parse(&message);
+        let akvp = AkvpMessage::parse(&message).unwrap();
 
         // Get the string command
         let ref str_cmd = akvp.command;

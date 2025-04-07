@@ -32,7 +32,7 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
         .unwrap_or_else(|| "127.0.0.1:8303".to_string());
 
     let listener = TcpListener::bind("0.0.0.0:8303").await?;
-    print!("Listening on: {}", addr);
+    println!("Listening on: {}", addr);
 
     // Accept loop
     loop {
