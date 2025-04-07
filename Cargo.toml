@@ -1,0 +1,17 @@
+[package]
+name = "simkv"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "simkv-cli"
+path = "src/cli.rs"
+
+
+[[bin]]
+name = "simkv-server"
+path = "src/server.rs"
+
+[dependencies]
+tokio = { version = "1.44.1", features = ["full"] }
+
