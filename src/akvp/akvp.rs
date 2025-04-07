@@ -16,7 +16,7 @@ pub struct AkvpMessage {
 
 impl AkvpMessage {
     pub fn parse(message: &Vec<u8>) -> Self {
-        println!("{:?}", message);
+        //println!("akvp::parse {:?}", message);
 
         // psudo code
         let protocol = "AKVP/1".to_string();

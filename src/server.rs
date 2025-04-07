@@ -72,16 +72,19 @@ async fn process(mut socket: TcpStream, buckets: &Vec<Bucket>) {
                 }
             };
         }
-        println!("{n}");
+
+        println!("mlen: {}, {:?}", mlen, String::from_utf8(buf.clone()));
 
         // Execute command
         let command = Command::parse_command(buf);
         let result = command.execute();
 
         // Write the data back
-        if let Err(e) = socket.write_all(&result).await {
+        /*if let Err(e) = socket.write_all(&result).await {
             eprintln!("failed to write to socket; err = {:?}", e);
             return;
-        }
+        }*/
+        let _ = socket.write_all(&result).await;
+        let _ = socket.flush().await;
     }
 }

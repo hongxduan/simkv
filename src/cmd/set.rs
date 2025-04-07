@@ -15,7 +15,7 @@ impl Set {
     }
 
     pub fn execute(self) -> Vec<u8> {
-        println!("{}", self.akvp.command);
+        println!("set::execute {}", self.akvp.command);
         Vec::new()
     }
 }

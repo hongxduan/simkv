@@ -16,7 +16,10 @@ impl Get {
     }
 
     pub fn execute(&self) -> Vec<u8> {
-        println!("{}", self.akvp.command);
-        Vec::new()
+        println!("get::execute {}", self.akvp.command);
+        let mut result: Vec<u8> = Vec::new();
+        result.push(b'H');
+        result.push(b'o');
+        result
     }
 }

@@ -13,5 +13,6 @@ name = "simkv-server"
 path = "src/server.rs"
 
 [dependencies]
+clap = { version = "4.5.35", features = ["derive"] }
 tokio = { version = "1.44.1", features = ["full"] }
 
