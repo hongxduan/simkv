@@ -4,14 +4,14 @@
 //
 // Get value by Key
 
-use crate::akvp::{self, akvp::AkvpMessage};
+use crate::akvp::kvtp::KvtpMessage;
 
 pub struct Get {
-    akvp: AkvpMessage,
+    akvp: KvtpMessage,
 }
 
 impl Get {
-    pub fn new(akvp: AkvpMessage) -> Self {
+    pub fn new(akvp: KvtpMessage) -> Self {
         Get { akvp }
     }
 

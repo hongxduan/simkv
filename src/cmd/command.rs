@@ -8,7 +8,7 @@ use super::get::Get;
 use super::key::Key;
 use super::set::Set;
 use super::unknown::Unknown;
-use crate::akvp::akvp::AkvpMessage;
+use crate::akvp::kvtp::KvtpMessage;
 
 pub enum Command {
     Get(Get),
@@ -35,7 +35,7 @@ impl Command {
 
     pub fn parse_command(message: Vec<u8>) -> Command {
         // Parse AKVP
-        let akvp = AkvpMessage::parse(&message).unwrap();
+        let akvp = KvtpMessage::parse(&message).unwrap();
 
         // Get the string command
         let ref str_cmd = akvp.command;

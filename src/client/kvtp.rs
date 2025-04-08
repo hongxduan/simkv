@@ -105,7 +105,7 @@ pub fn build_akvp_message(input_data: InputData) -> Vec<u8> {
 ///
 ///
 pub fn parse_akvp_response(buf: Vec<u8>) -> String {
-    let mut result: String = String::new();
+    let result: String = String::new();
 
     result
 }

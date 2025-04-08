@@ -3,14 +3,14 @@
 ///! author: Duan HongXing
 ///! date: 4 Apr, 2025
 ///
-use crate::akvp::akvp::AkvpMessage;
+use crate::akvp::kvtp::KvtpMessage;
 
 pub struct Key {
-    akvp: AkvpMessage,
+    akvp: KvtpMessage,
 }
 
 impl Key {
-    pub fn new(akvp: AkvpMessage) -> Self {
+    pub fn new(akvp: KvtpMessage) -> Self {
         Key { akvp }
     }
 

@@ -6,24 +6,28 @@ use std::i32;
 ///! date: 5 Apr, 2025
 ///!
 
-const PROTOCOL: &str = "AKVP/1";
 const CMD_PREFIX: &str = "CMD: ";
 const KEY_PREFIX: &str = "KEY: ";
 const ARGS_PREFIX: &str = "ARGS: ";
 const TTL_PREFIX: &str = "TTL: ";
-const SPACE_CHAR: u8 = b' ';
 
-pub struct AkvpMessage {
-    protocol: String,
+pub struct KvtpMessage {
+    pub protocol: String,
     pub command: String,
-    key: String,
-    args: String,
-    ttl: i32,
+    pub key: String,
+    pub args: String,
+    pub ttl: i32,
 
-    body: Vec<u8>,
+    pub body: Vec<u8>,
 }
 
-impl AkvpMessage {
+///
+/// 
+/// 
+impl KvtpMessage {
+    ///
+    /// Parse bytes message to Kvtp
+    /// 
     pub fn parse(message: &Vec<u8>) -> Result<Self, String> {
         println!("akvp::parse {:?}", message);
 
@@ -34,7 +38,6 @@ impl AkvpMessage {
         let mut command = String::new();
         let mut key = String::new();
         let mut args = String::new();
-        let mut s_ttl = String::new();
         let mut ttl: i32 = 0;
         let mut body: Vec<u8> = Vec::new();
 
@@ -88,6 +91,7 @@ impl AkvpMessage {
                                     }
                                 },
                                 TTL_PREFIX => {
+                                    let mut s_ttl = String::new();
                                     match sec_part {
                                         Some(second) => s_ttl = second.trim().to_string(),
                                         None => {
@@ -110,7 +114,7 @@ impl AkvpMessage {
                         }
                     }
                 }
-                Err(e) => {}
+                Err(_) => {}
             }
         }
 
@@ -118,14 +122,14 @@ impl AkvpMessage {
         println!("header_len:{}/{}", header_len, &message.len());
         println!("{:?}", String::from_utf8(message.to_vec()));
 
-        //TO FIX: 
+        //TO FIX:
         let tmp = message.to_vec();
         body = tmp[header_len..tmp.len()].to_vec();
 
         if err_msg.len() != 0 {
             return Err(err_msg);
         }
-        let akvp_msg = AkvpMessage {
+        let akvp_msg = KvtpMessage {
             protocol,
             command,
             key,

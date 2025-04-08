@@ -9,7 +9,7 @@ use std::io::{self, Read};
 use std::net::TcpStream;
 
 mod client;
-use client::akvp::build_akvp_message;
+use client::kvtp::{build_akvp_message, parse_akvp_response};
 use client::client::parse_input;
 
 const CLI_PREFIX: &str = "simkv> ";
@@ -57,6 +57,7 @@ fn main() {
                         let len_result = stream.read(&mut buf);
                         match len_result {
                             Ok(len) => {
+                                parse_akvp_response(buf.to_vec());
                                 println!("{},{:?}", len, String::from_utf8(buf[0..len].to_vec()));
                             }
                             Err(e) => {

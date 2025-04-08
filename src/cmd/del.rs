@@ -3,14 +3,14 @@
 // date: 4 Apr, 2025
 //
 
-use crate::akvp::akvp::AkvpMessage;
+use crate::akvp::kvtp::KvtpMessage;
 
 pub struct Del {
-    akvp: AkvpMessage,
+    akvp: KvtpMessage,
 }
 
 impl Del {
-    pub fn new(akvp: AkvpMessage) -> Self {
+    pub fn new(akvp: KvtpMessage) -> Self {
         Del { akvp }
     }
 

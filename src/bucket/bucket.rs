@@ -7,7 +7,7 @@ use std::collections::HashMap;
 pub const BUCKET_SIZE: usize = 512;
 
 pub struct Bucket {
-    key: u16,
+    id: u16,
     slots: Vec<HashMap<String, Vec<u8>>>,
     //left: &<'a>Bucket,
     //right: &'a Bucket,
@@ -22,13 +22,14 @@ impl Bucket {
         buckets
     }
 
-    pub fn new(key: u16) -> Bucket {
+    pub fn new(id: u16) -> Bucket {
         let slots = std::iter::repeat_with(|| HashMap::new())
             .take(20)
             .collect::<Vec<_>>();
-        let bucket = Bucket { key, slots };
+        let bucket = Bucket { id, slots };
         bucket
     }
+
 
     /*
     fn locate_bucket(self: &Self, key: u16) -> Box<Bucket> {

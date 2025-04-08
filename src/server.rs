@@ -47,7 +47,7 @@ async fn process(mut socket: TcpStream, buckets: &Vec<Bucket>) {
 
     loop {
         // Read message lenght bytes
-        let n = match socket.read(&mut lbuf).await {
+        let _n = match socket.read(&mut lbuf).await {
             // socket closed
             Ok(0) => return,
             Ok(n) => n,

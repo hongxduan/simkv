@@ -1,16 +1,22 @@
-//
-// author: Duan HongXing
-// date: 4 Apr, 2025
-//
+///! Set implement
+///! 
+///! author: Duan HongXing
+///! date: 4 Apr, 2025
+///!
 
-use crate::akvp::akvp::AkvpMessage;
+use crate::akvp::kvtp::KvtpMessage;
 
 pub struct Set {
-    akvp: AkvpMessage,
+    akvp: KvtpMessage,
 }
 
 impl Set {
-    pub fn new(akvp: AkvpMessage) -> Self {
+    pub fn new(akvp: KvtpMessage) -> Self {
+        // TODO: parse key to determine data type
+        println!(
+            "{}{}{}{}{:?}",
+            akvp.command, akvp.key, akvp.args, akvp.ttl, akvp.body
+        );
         Set { akvp }
     }
 
