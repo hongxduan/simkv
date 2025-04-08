@@ -34,7 +34,7 @@ impl Command {
     }
 
     pub fn parse_command(message: Vec<u8>) -> Command {
-        // Parse AKVP
+        // Parse KVTP
         let akvp = KvtpMessage::parse(&message).unwrap();
 
         // Get the string command

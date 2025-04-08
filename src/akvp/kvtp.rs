@@ -6,11 +6,13 @@ use std::i32;
 ///! date: 5 Apr, 2025
 ///!
 
-const CMD_PREFIX: &str = "CMD: ";
-const KEY_PREFIX: &str = "KEY: ";
-const ARGS_PREFIX: &str = "ARGS: ";
-const TTL_PREFIX: &str = "TTL: ";
+const CMD_LINE_HEAD: &str = "CMD";
+const KEY_LINE_HEAD: &str = "KEY";
+const ARGS_LINE_HEAD: &str = "ARGS";
+const TTL_LINE_HEAD: &str = "TTL";
+const LINE_FEED: u8 = b'\n';
 
+#[derive(Debug)]
 pub struct KvtpMessage {
     pub protocol: String,
     pub command: String,
@@ -22,14 +24,14 @@ pub struct KvtpMessage {
 }
 
 ///
-/// 
-/// 
+///
+///
 impl KvtpMessage {
     ///
     /// Parse bytes message to Kvtp
-    /// 
+    ///
     pub fn parse(message: &Vec<u8>) -> Result<Self, String> {
-        println!("akvp::parse {:?}", message);
+        //println!("akvp::parse {:?}", message);
 
         let mut err_msg = String::new();
 
@@ -39,78 +41,81 @@ impl KvtpMessage {
         let mut key = String::new();
         let mut args = String::new();
         let mut ttl: i32 = 0;
-        let mut body: Vec<u8> = Vec::new();
 
-        let lines = message.split(|&b| b == b'\n');
+        //Split message by line feed
+        let lines = message.split(|&b| b == LINE_FEED);
 
         let mut header_len = 0;
 
-        for (i, line) in lines.enumerate() {
-            let sline = String::from_utf8(line.to_vec());
+        for (i, l) in lines.enumerate() {
+            let sline = String::from_utf8(l.to_vec());
 
             match sline {
-                Ok(l) => {
-                    header_len += l.len();
+                Ok(line) => {
+                    header_len += line.len();
                     header_len += 1; // line feed
 
                     // Check if the first empty line, then body started
-                    if l == String::from("") {
+                    if line == String::from("") {
                         break;
                     }
 
                     if i == 0 {
-                        protocol = String::from_utf8(line.to_vec()).unwrap();
+                        protocol = line;
                     } else {
-                        // Split line
-                        let mut parts = l.split(":");
+                        // Split line by Colon
+                        let mut parts = line.split(":");
                         // Get the first part separated by colon
-                        let fst_part = parts.next();
+                        let fst_part = parts.next().unwrap();
                         // Get the second part separated by colon
                         let sec_part = parts.next();
-                        match fst_part {
-                            Some(first) => match first {
-                                CMD_PREFIX => match sec_part {
-                                    Some(second) => command = second.trim().to_string(),
+                        //println!("{}:{}", fst_part, sec_part.unwrap());
+                        match fst_part.to_uppercase().as_str() {
+                            CMD_LINE_HEAD => match sec_part {
+                                Some(second) => {
+                                    command = second.trim().to_string();
+                                    println!("cmd is: {}", command);
+                                }
+                                None => {
+                                    err_msg = String::from("Invalid command");
+                                    break;
+                                }
+                            },
+                            KEY_LINE_HEAD => match sec_part {
+                                Some(second) => key = second.trim().to_string(),
+                                None => {
+                                    err_msg = String::from("Invalid key");
+                                    break;
+                                }
+                            },
+                            ARGS_LINE_HEAD => match sec_part {
+                                Some(second) => args = second.trim().to_string(),
+                                None => {
+                                    err_msg = String::from("Invalid args");
+                                    break;
+                                }
+                            },
+                            TTL_LINE_HEAD => {
+                                let s_ttl;
+                                match sec_part {
+                                    Some(second) => s_ttl = second.trim().to_string(),
                                     None => {
-                                        err_msg = String::from("Invalid command");
+                                        err_msg = String::from("Invalid ttl");
                                         break;
-                                    }
-                                },
-                                KEY_PREFIX => match sec_part {
-                                    Some(second) => key = second.trim().to_string(),
-                                    None => {
-                                        err_msg = String::from("Invalid key");
-                                        break;
-                                    }
-                                },
-                                ARGS_PREFIX => match sec_part {
-                                    Some(second) => args = second.trim().to_string(),
-                                    None => {
-                                        err_msg = String::from("Invalid args");
-                                        break;
-                                    }
-                                },
-                                TTL_PREFIX => {
-                                    let mut s_ttl = String::new();
-                                    match sec_part {
-                                        Some(second) => s_ttl = second.trim().to_string(),
-                                        None => {
-                                            err_msg = String::from("Invalid ttl");
-                                            break;
-                                        }
-                                    }
-                                    let tmp = s_ttl.parse::<i32>();
-                                    match tmp {
-                                        Ok(i) => ttl = i,
-                                        Err(_) => {
-                                            err_msg = String::from("Invalid ttl");
-                                            break;
-                                        }
                                     }
                                 }
-                                _ => {}
-                            },
-                            None => {}
+                                let tmp = s_ttl.parse::<i32>();
+                                match tmp {
+                                    Ok(i) => ttl = i,
+                                    Err(_) => {
+                                        err_msg = String::from("Invalid ttl");
+                                        break;
+                                    }
+                                }
+                            }
+                            _ => {
+                                println!("{}:{}", fst_part, sec_part.unwrap());
+                            }
                         }
                     }
                 }
@@ -118,13 +123,8 @@ impl KvtpMessage {
             }
         }
 
-        //let tmp:Vec<_> = message.iter().skip(header_len).take(10).collect();
-        println!("header_len:{}/{}", header_len, &message.len());
-        println!("{:?}", String::from_utf8(message.to_vec()));
-
-        //TO FIX:
-        let tmp = message.to_vec();
-        body = tmp[header_len..tmp.len()].to_vec();
+        // Body
+        let body = message[header_len..].to_vec();
 
         if err_msg.len() != 0 {
             return Err(err_msg);
@@ -137,6 +137,8 @@ impl KvtpMessage {
             ttl,
             body,
         };
+
+        //println!("{:?}", akvp_msg);
 
         Ok(akvp_msg)
     }

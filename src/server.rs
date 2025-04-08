@@ -56,6 +56,12 @@ async fn process(mut socket: TcpStream, buckets: &Vec<Bucket>) {
                 return;
             }
         };
+
+        // Why this happen???
+        if lbuf == [0, 0, 0, 0] {
+            continue;
+        }
+
         let mlen = u32::from_be_bytes(lbuf) as usize;
         let mut buf = vec![0; mlen.try_into().unwrap()];
 
@@ -73,7 +79,7 @@ async fn process(mut socket: TcpStream, buckets: &Vec<Bucket>) {
             };
         }
 
-        println!("mlen: {}, {:?}", mlen, String::from_utf8(buf.clone()));
+        //println!("mlen: {}, {:?}", mlen, String::from_utf8(buf.clone()));
 
         // Execute command
         let command = Command::parse_command(buf);

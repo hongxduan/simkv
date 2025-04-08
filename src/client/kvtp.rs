@@ -7,7 +7,7 @@ use crate::client::client::InputData;
 
 const LINE_FEED: u8 = b'\n'; // 0xA
 
-const PROTOCOL_BYTES: &[u8] = "AKVP/1".as_bytes();
+const PROTOCOL_BYTES: &[u8] = "KVTP/1".as_bytes();
 const KEY_PREFIX_BYTES: &[u8] = "KEY: ".as_bytes();
 const CMD_PREFIX_BYTES: &[u8] = "CMD: ".as_bytes();
 const ARGS_PREFIX_BYTES: &[u8] = "ARGS: ".as_bytes();
@@ -17,7 +17,7 @@ const TTL_PREFIX_BYTES: &[u8] = "TTL: ".as_bytes();
 ///
 ///
 ///
-pub fn build_akvp_message(input_data: InputData) -> Vec<u8> {
+pub fn build_kvtp_message(input_data: InputData) -> Vec<u8> {
     let mut message: Vec<u8> = Vec::new();
     //
     // Protocol line
@@ -104,7 +104,7 @@ pub fn build_akvp_message(input_data: InputData) -> Vec<u8> {
 ///
 ///
 ///
-pub fn parse_akvp_response(buf: Vec<u8>) -> String {
+pub fn parse_kvtp_response(buf: Vec<u8>) -> String {
     let result: String = String::new();
 
     result
