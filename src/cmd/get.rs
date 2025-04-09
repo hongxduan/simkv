@@ -1,13 +1,10 @@
-//
-// author: Duan HongXing
-// date: 4 Apr, 2025
-//
-// Get value by Key
-
-use crate::{
-    akvp::kvtp::{self, KvtpMessage},
-    bucket::{bucket::Bucket, db::Db},
-};
+///! Get command implement
+///!
+///! author: Duan HongXing
+///! date: 4 Apr, 2025
+///!
+///! Get value by Key
+use crate::{akvp::kvtp::KvtpMessage, db::db::Db};
 
 pub struct Get {
     kvtp: KvtpMessage,

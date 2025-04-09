@@ -47,8 +47,8 @@ fn main() {
         let input_data = parse_input(input.trim());
         match input_data {
             Ok(data) => {
-                let akvp = build_kvtp_message(data);
-                let result = stream.write_all(akvp.as_slice());
+                let kvtp = build_kvtp_message(data);
+                let result = stream.write_all(kvtp.as_slice());
                 match result {
                     Ok(_) => {
                         let mut buf = [0; 1024];

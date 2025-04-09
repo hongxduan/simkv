@@ -1,7 +1,8 @@
-//
-// author: Duan HongXing
-// date: 4 Apr, 2025
-//
+///! cmd Mod
+///!
+///! author: Duan HongXing
+///! date: 4 Apr, 2025
+///!
 
 mod base;
 

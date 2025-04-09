@@ -1,9 +1,9 @@
-//
-// author: Duan HongXing
-// date: 4 Apr, 2025
-//
-
-use crate::{akvp::kvtp::KvtpMessage, bucket::bucket::Bucket};
+///! Del command implement
+///!
+///! author: Duan HongXing
+///! date: 4 Apr, 2025
+///!
+use crate::akvp::kvtp::KvtpMessage;
 
 pub struct Del {
     akvp: KvtpMessage,

@@ -1,29 +1,30 @@
-///! Set implement
+///! Set command implement
 ///!
 ///! author: Duan HongXing
 ///! date: 4 Apr, 2025
 ///!
 use crate::{
     akvp::kvtp::KvtpMessage,
-    bucket::{db::Db, entry::Entry},
+    db::{db::Db, entry::Entry},
 };
 
+use super::base::BaseCommand;
 
 #[derive(Debug)]
 pub struct Set {
     kvtp: KvtpMessage,
 }
 
-impl Set {
-    pub fn new(kvtp: KvtpMessage) -> Self {
+impl BaseCommand for Set {
+    fn new(kvtp: KvtpMessage) -> Self {
         Set { kvtp }
     }
 
-    pub fn execute(self, db: &Db) -> Vec<u8> {
+    fn execute(self, db: &Db) -> Vec<u8> {
         println!("set::execute {}", self.kvtp.command);
         // TODO: parse key to determine data type
         let entry = Entry {
-            vtype: crate::bucket::entry::EntryType::STR,
+            vtype: crate::db::entry::EntryType::STR,
             byt: Some(self.kvtp.body.clone()),
             map: None,
             lst: None,

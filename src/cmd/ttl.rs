@@ -1,20 +1,34 @@
-///! Set implement
+///! Ttl command implement
 ///!
 ///! author: Duan HongXing
 ///! date: 4 Apr, 2025
 ///!
-use crate::{akvp::kvtp::KvtpMessage, bucket::bucket::Bucket};
+///! Command:
+///!     `ttl key`
+///!
+///! Examples:
+///!    ttl k1
+///!
+///! Return:
+///!    -2: expired
+///!    -1: never expire
+///!    >0: seconds to expire
+///!
+///!
+use crate::{akvp::kvtp::KvtpMessage, db::db::Db};
+
+use super::base::BaseCommand;
 
 pub struct Ttl {
     kvtp: KvtpMessage,
 }
 
-impl Ttl {
-    pub fn new(kvtp: KvtpMessage) -> Self {
+impl BaseCommand for Ttl {
+    fn new(kvtp: KvtpMessage) -> Self {
         Ttl { kvtp }
     }
 
-    pub fn execute(self, bucket: &Bucket) -> Vec<u8> {
+    fn execute(self, db: &Db) -> Vec<u8> {
         println!("set::execute {}", self.kvtp.command);
         // TODO: parse key to determine data type
         println!(

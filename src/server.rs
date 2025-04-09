@@ -4,14 +4,14 @@
 //! date: 4 Apr, 2025
 
 use akvp::kvtp::KvtpMessage;
-use bucket::db::Db;
+use db::db::Db;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 
 use std::{env, vec};
 
-mod bucket;
-use bucket::bucket::Bucket;
+mod db;
+use db::bucket::Bucket;
 
 mod akvp;
 mod cmd;

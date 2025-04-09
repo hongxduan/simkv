@@ -323,6 +323,7 @@ dependencies = [
 name = "simkv"
 version = "0.1.0"
 dependencies = [
+ "bytes",
  "clap",
  "crc",
  "tokio",
