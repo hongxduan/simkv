@@ -63,7 +63,12 @@ pub fn parse_input(input: &str) -> Result<InputData, String> {
 
             // if not quoted, then push piece pieces
             if !quoted {
-                pieces.push(input[si..i].trim().to_string());
+                if i == input.len() - 1 {
+                    pieces.push(input[si..].trim().to_string());
+                } else {
+                    pieces.push(input[si..i].trim().to_string());
+                }
+
                 si = i;
             }
         } else if c == DQUTE_CHAR {

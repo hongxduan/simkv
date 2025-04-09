@@ -74,7 +74,6 @@ impl KvtpMessage {
                             CMD_LINE_HEAD => match sec_part {
                                 Some(second) => {
                                     command = second.trim().to_string();
-                                    println!("cmd is: {}", command);
                                 }
                                 None => {
                                     err_msg = String::from("Invalid command");

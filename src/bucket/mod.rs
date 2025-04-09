@@ -5,4 +5,6 @@
 
 pub mod bucket;
 
-pub mod value;
+pub mod db;
+
+pub mod entry;

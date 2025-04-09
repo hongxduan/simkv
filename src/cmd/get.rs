@@ -4,22 +4,26 @@
 //
 // Get value by Key
 
-use crate::akvp::kvtp::KvtpMessage;
+use crate::{
+    akvp::kvtp::{self, KvtpMessage},
+    bucket::{bucket::Bucket, db::Db},
+};
 
 pub struct Get {
-    akvp: KvtpMessage,
+    kvtp: KvtpMessage,
 }
 
 impl Get {
-    pub fn new(akvp: KvtpMessage) -> Self {
-        Get { akvp }
+    pub fn new(kvtp: KvtpMessage) -> Self {
+        Get { kvtp }
     }
 
-    pub fn execute(&self) -> Vec<u8> {
-        println!("get::execute {}", self.akvp.command);
-        let mut result: Vec<u8> = Vec::new();
-        result.push(b'H');
-        result.push(b'o');
-        result
+    pub fn execute(&self, db: &Db) -> Vec<u8> {
+        //println!("get::execute {}", self.kvtp.command);
+        let entry = db.get(self.kvtp.key.clone());
+        match entry {
+            Some(val) => val.byt.unwrap(),
+            None => "nil".as_bytes().to_vec(),
+        }
     }
 }

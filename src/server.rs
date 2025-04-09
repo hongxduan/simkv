@@ -3,6 +3,8 @@
 //! author: Duan HongXing
 //! date: 4 Apr, 2025
 
+use akvp::kvtp::KvtpMessage;
+use bucket::db::Db;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 
@@ -25,7 +27,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// Start accept loop
 async fn run() -> Result<(), Box<dyn std::error::Error>> {
     // Init Buckets
-    let buckets = Bucket::init();
+    //let buckets = Bucket::init();
+
+    // Init Db
+    let db = Db::new();
 
     let addr = env::args()
         .nth(1)
@@ -37,12 +42,14 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
     // Accept loop
     loop {
         let (socket, _) = listener.accept().await?;
-        process(socket, &buckets).await;
+        process(socket, &db).await;
     }
 }
 
-// Strt read loop
-async fn process(mut socket: TcpStream, buckets: &Vec<Bucket>) {
+///
+/// Strt read loop
+///
+async fn process(mut socket: TcpStream, db: &Db) {
     let mut lbuf: [u8; 4] = [0, 0, 0, 0];
 
     loop {
@@ -62,10 +69,15 @@ async fn process(mut socket: TcpStream, buckets: &Vec<Bucket>) {
             continue;
         }
 
+        //
+        // Read one single command byte length
+        //
         let mlen = u32::from_be_bytes(lbuf) as usize;
         let mut buf = vec![0; mlen.try_into().unwrap()];
 
-        // Read message content
+        //
+        // Read message content based on the length readed above
+        //
         let mut n: usize = 0;
         while n < mlen {
             n += match socket.read(&mut buf).await {
@@ -81,16 +93,22 @@ async fn process(mut socket: TcpStream, buckets: &Vec<Bucket>) {
 
         //println!("mlen: {}, {:?}", mlen, String::from_utf8(buf.clone()));
 
+        //
+        // Parse command
+        //
+        let command = Command::parse_command(&buf);
+
+        //
         // Execute command
-        let command = Command::parse_command(buf);
-        let result = command.execute();
+        //
+        let result = command.execute(db);
 
         // Write the data back
-        /*if let Err(e) = socket.write_all(&result).await {
+        if let Err(e) = socket.write_all(&result).await {
             eprintln!("failed to write to socket; err = {:?}", e);
             return;
-        }*/
-        let _ = socket.write_all(&result).await;
-        let _ = socket.flush().await;
+        }
+        //let _ = socket.write_all(&result).await;
+        //let _ = socket.flush().await;
     }
 }
