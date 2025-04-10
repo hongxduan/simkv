@@ -3,19 +3,20 @@
 //! author: Duan HongXing
 //! date: 4 Apr, 2025
 
-use akvp::kvtp::KvtpMessage;
 use db::db::Db;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
+use tokio::signal;
 
 use std::{env, vec};
 
 mod db;
-use db::bucket::Bucket;
 
 mod akvp;
 mod cmd;
 use cmd::command::Command;
+
+mod runner;
 
 /// SimKV server main fn
 #[tokio::main]
@@ -29,9 +30,6 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
     // Init Buckets
     //let buckets = Bucket::init();
 
-    // Init Db
-    let db = Db::new();
-
     let addr = env::args()
         .nth(1)
         .unwrap_or_else(|| "127.0.0.1:8303".to_string());
@@ -39,11 +37,18 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
     let listener = TcpListener::bind("0.0.0.0:8303").await?;
     println!("Listening on: {}", addr);
 
+    runner::run(listener, signal::ctrl_c()).await;
+
+    Ok(())
+
+    // Init Db
+    //let db = Db::new();
+
     // Accept loop
-    loop {
+    /*loop {
         let (socket, _) = listener.accept().await?;
         process(socket, &db).await;
-    }
+    }*/
 }
 
 ///

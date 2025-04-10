@@ -18,7 +18,10 @@ use std::{
     collections::BTreeSet,
     sync::{Arc, Mutex},
 };
-use tokio::{sync::Notify, time::Instant};
+use tokio::{
+    sync::Notify,
+    time::{self, Instant},
+};
 
 use super::{
     bucket::{BUCKETS_PER_PAGE, Bucket, SLOTS_PER_BUCKET},
@@ -28,181 +31,67 @@ use super::{
 const PAGE_NUM: usize = 16;
 const BUCKET_NUM: usize = PAGE_NUM * BUCKETS_PER_PAGE; // 1024
 
-#[derive(Debug, Clone)]
-pub struct State {
-    pub buckets: Vec<Bucket>,
-    expirations: BTreeSet<(Instant, String)>,
+#[derive(Debug)]
+struct Page {
+    buckets: Vec<Bucket>,
 }
 
 #[derive(Debug)]
-struct Page {
+struct State {
+    pages: Vec<Page>,
+    expirations: BTreeSet<(Instant, String)>,
+    shutdown: bool,
+}
+
+#[derive(Debug)]
+struct Shared {
     state: Mutex<State>,
     background_task: Notify,
 }
 
+#[derive(Debug)]
+pub(crate) struct DbDropGuard {
+    db: Db,
+}
+
 #[derive(Debug, Clone)]
 pub struct Db {
-    page0: Arc<Page>,
-    page1: Arc<Page>,
-    page2: Arc<Page>,
-    page3: Arc<Page>,
-    page4: Arc<Page>,
-    page5: Arc<Page>,
-    page6: Arc<Page>,
-    page7: Arc<Page>,
-    page8: Arc<Page>,
-    page9: Arc<Page>,
-    page10: Arc<Page>,
-    page11: Arc<Page>,
-    page12: Arc<Page>,
-    page13: Arc<Page>,
-    page14: Arc<Page>,
-    page15: Arc<Page>,
+    //pages: Arc<Vec<Page>>
+    shared: Arc<Shared>,
 }
 
 impl Db {
     pub fn new() -> Self {
-        let page0 = Arc::new(Page {
+        /*let pages = std::iter::repeat_with(|| Page {
             state: Mutex::new(State {
                 buckets: Bucket::init(),
+                //expirations: BTreeSet::new(),
+            }),
+            background_task: Notify::new(),
+        })
+        .take(16)
+        .collect();*/
+
+        let pages = std::iter::repeat_with(|| Page {
+            buckets: Bucket::init(),
+        })
+        .take(16)
+        .collect::<Vec<_>>();
+
+        let shared = Arc::new(Shared {
+            state: Mutex::new(State {
+                pages,
+                shutdown: false,
                 expirations: BTreeSet::new(),
             }),
             background_task: Notify::new(),
         });
 
-        let page1 = Arc::new(Page {
-            state: Mutex::new(State {
-                buckets: Bucket::init(),
-                expirations: BTreeSet::new(),
-            }),
-            background_task: Notify::new(),
-        });
-
-        let page2 = Arc::new(Page {
-            state: Mutex::new(State {
-                buckets: Bucket::init(),
-                expirations: BTreeSet::new(),
-            }),
-            background_task: Notify::new(),
-        });
-
-        let page3 = Arc::new(Page {
-            state: Mutex::new(State {
-                buckets: Bucket::init(),
-                expirations: BTreeSet::new(),
-            }),
-            background_task: Notify::new(),
-        });
-
-        let page4 = Arc::new(Page {
-            state: Mutex::new(State {
-                buckets: Bucket::init(),
-                expirations: BTreeSet::new(),
-            }),
-            background_task: Notify::new(),
-        });
-
-        let page5 = Arc::new(Page {
-            state: Mutex::new(State {
-                buckets: Bucket::init(),
-                expirations: BTreeSet::new(),
-            }),
-            background_task: Notify::new(),
-        });
-
-        let page6 = Arc::new(Page {
-            state: Mutex::new(State {
-                buckets: Bucket::init(),
-                expirations: BTreeSet::new(),
-            }),
-            background_task: Notify::new(),
-        });
-
-        let page7 = Arc::new(Page {
-            state: Mutex::new(State {
-                buckets: Bucket::init(),
-                expirations: BTreeSet::new(),
-            }),
-            background_task: Notify::new(),
-        });
-
-        let page8 = Arc::new(Page {
-            state: Mutex::new(State {
-                buckets: Bucket::init(),
-                expirations: BTreeSet::new(),
-            }),
-            background_task: Notify::new(),
-        });
-
-        let page9 = Arc::new(Page {
-            state: Mutex::new(State {
-                buckets: Bucket::init(),
-                expirations: BTreeSet::new(),
-            }),
-            background_task: Notify::new(),
-        });
-
-        let page10 = Arc::new(Page {
-            state: Mutex::new(State {
-                buckets: Bucket::init(),
-                expirations: BTreeSet::new(),
-            }),
-            background_task: Notify::new(),
-        });
-
-        let page11 = Arc::new(Page {
-            state: Mutex::new(State {
-                buckets: Bucket::init(),
-                expirations: BTreeSet::new(),
-            }),
-            background_task: Notify::new(),
-        });
-        let page12 = Arc::new(Page {
-            state: Mutex::new(State {
-                buckets: Bucket::init(),
-                expirations: BTreeSet::new(),
-            }),
-            background_task: Notify::new(),
-        });
-        let page13 = Arc::new(Page {
-            state: Mutex::new(State {
-                buckets: Bucket::init(),
-                expirations: BTreeSet::new(),
-            }),
-            background_task: Notify::new(),
-        });
-        let page14 = Arc::new(Page {
-            state: Mutex::new(State {
-                buckets: Bucket::init(),
-                expirations: BTreeSet::new(),
-            }),
-            background_task: Notify::new(),
-        });
-        let page15 = Arc::new(Page {
-            state: Mutex::new(State {
-                buckets: Bucket::init(),
-                expirations: BTreeSet::new(),
-            }),
-            background_task: Notify::new(),
-        });
+        tokio::spawn(purge_expired_tasks(shared.clone()));
 
         Db {
-            page0,
-            page1,
-            page2,
-            page3,
-            page4,
-            page5,
-            page6,
-            page7,
-            page8,
-            page9,
-            page10,
-            page11,
-            page12,
-            page13,
-            page14,
-            page15,
+            //pages: Arc::new(pages),
+            shared,
         }
     }
 
@@ -213,26 +102,9 @@ impl Db {
         //state.buckets[bucket_id].slots[slot].insert(key, entry);
 
         let (page, bucket, slot) = self.locate_pbs(&key);
-        let mut state = match page {
-            0 => self.page0.state.lock().unwrap(),
-            1 => self.page1.state.lock().unwrap(),
-            2 => self.page2.state.lock().unwrap(),
-            3 => self.page3.state.lock().unwrap(),
-            4 => self.page4.state.lock().unwrap(),
-            5 => self.page5.state.lock().unwrap(),
-            6 => self.page6.state.lock().unwrap(),
-            7 => self.page7.state.lock().unwrap(),
-            8 => self.page8.state.lock().unwrap(),
-            9 => self.page9.state.lock().unwrap(),
-            10 => self.page10.state.lock().unwrap(),
-            11 => self.page11.state.lock().unwrap(),
-            12 => self.page12.state.lock().unwrap(),
-            13 => self.page13.state.lock().unwrap(),
-            14 => self.page14.state.lock().unwrap(),
-            15 => self.page15.state.lock().unwrap(),
-            _ => self.page15.state.lock().unwrap(),
-        };
-        state.buckets[bucket].slots[slot].insert(key, entry);
+        let mut state = self.shared.state.lock().unwrap();
+        state.pages[page].buckets[bucket].slots[slot].insert(key, entry);
+        //state.buckets[bucket].slots[slot].insert(key, entry);
 
         drop(state);
     }
@@ -242,28 +114,8 @@ impl Db {
         //let slot = self.calc_slot(&key);
 
         let (page, bucket, slot) = self.locate_pbs(&key);
-        let state = match page {
-            0 => self.page0.state.lock().unwrap(),
-            1 => self.page1.state.lock().unwrap(),
-            2 => self.page2.state.lock().unwrap(),
-            3 => self.page3.state.lock().unwrap(),
-            4 => self.page4.state.lock().unwrap(),
-            5 => self.page5.state.lock().unwrap(),
-            6 => self.page6.state.lock().unwrap(),
-            7 => self.page7.state.lock().unwrap(),
-            8 => self.page8.state.lock().unwrap(),
-            9 => self.page9.state.lock().unwrap(),
-            10 => self.page10.state.lock().unwrap(),
-            11 => self.page11.state.lock().unwrap(),
-            12 => self.page12.state.lock().unwrap(),
-            13 => self.page13.state.lock().unwrap(),
-            14 => self.page14.state.lock().unwrap(),
-            15 => self.page15.state.lock().unwrap(),
-            _ => self.page15.state.lock().unwrap(),
-        };
-
-        //let state = self.page0.state.lock().unwrap();
-        let entry = state.buckets[bucket].slots[slot].get(&key);
+        let state = self.shared.state.lock().unwrap();
+        let entry = state.pages[page].buckets[bucket].slots[slot].get(&key);
 
         entry.cloned()
     }
@@ -286,5 +138,88 @@ impl Db {
         let slot = bucket_id % SLOTS_PER_BUCKET; // 155 % 256 = 155 => page2.buckets[27].slot[155]
 
         (page, bucket, slot)
+    }
+
+    fn shutdown_purge_task(&self) {
+        // The background task must be signaled to shut down. This is done by
+        // setting `State::shutdown` to `true` and signalling the task.
+        let mut state = self.shared.state.lock().unwrap();
+        state.shutdown = true;
+
+        // Drop the lock before signalling the background task. This helps
+        // reduce lock contention by ensuring the background task doesn't
+        // wake up only to be unable to acquire the mutex.
+        drop(state);
+        self.shared.background_task.notify_one();
+    }
+}
+
+impl DbDropGuard {
+    pub(crate) fn new() -> DbDropGuard {
+        DbDropGuard { db: Db::new() }
+    }
+
+    pub(crate) fn db(&self) -> Db {
+        self.db.clone()
+    }
+}
+
+impl Drop for DbDropGuard {
+    fn drop(&mut self) {
+        self.db.shutdown_purge_task();
+    }
+}
+
+impl Shared {
+    fn purge_expired_keys(&self) -> Option<Instant> {
+        let mut state = self.state.lock().unwrap();
+
+        if state.shutdown {
+            // The database is shutting down. All handles to the shared state
+            // have dropped. The background task should exit.
+            return None;
+        }
+
+        // This is needed to make the borrow checker happy. In short, `lock()`
+        // returns a `MutexGuard` and not a `&mut State`. The borrow checker is
+        // not able to see "through" the mutex guard and determine that it is
+        // safe to access both `state.expirations` and `state.entries` mutably,
+        // so we get a "real" mutable reference to `State` outside of the loop.
+        let state = &mut *state;
+
+        // Find all keys scheduled to expire **before** now.
+        let now = Instant::now();
+
+        while let Some(&(when, ref key)) = state.expirations.iter().next() {
+            if when > now {
+                // Done purging, `when` is the instant at which the next key
+                // expires. The worker task will wait until this instant.
+                return Some(when);
+            }
+
+            // The key expired, remove it
+            state.pages[1].buckets[1].slots[1].remove(key); // TODO: remove hardcode index
+            state.expirations.remove(&(when, key.clone()));
+        }
+
+        None
+    }
+
+    fn is_shutdown(&self) -> bool {
+        self.state.lock().unwrap().shutdown
+    }
+}
+
+async fn purge_expired_tasks(shared: Arc<Shared>) {
+    while !shared.is_shutdown() {
+        println!("purge...");
+        if let Some(when) = shared.purge_expired_keys() {
+            tokio::select! {
+                _=time::sleep_until(when)=>{}
+                _=shared.background_task.notified()=>{}
+            }
+        } else {
+            shared.background_task.notified().await;
+        }
     }
 }

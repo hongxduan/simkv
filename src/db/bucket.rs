@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use super::entry::Entry;
 
 pub const BUCKETS_PER_PAGE: usize = 64;
-pub const SLOTS_PER_BUCKET: usize = 256;
+pub const SLOTS_PER_BUCKET: usize = 64;
 
 #[derive(Debug, Clone)]
 pub struct Bucket {
