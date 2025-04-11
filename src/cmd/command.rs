@@ -1,7 +1,8 @@
-///!
-///! author: Duan HongXing
-///! date: 6 Apr, 2025
-///!
+//! Command implement
+//!
+//! author: Duan HongXing
+//! date: 6 Apr, 2025
+//!
 use super::base::BaseCommand;
 use super::del::Del;
 use super::get::Get;

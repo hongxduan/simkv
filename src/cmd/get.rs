@@ -4,23 +4,79 @@
 ///! date: 4 Apr, 2025
 ///!
 ///! Get value by Key
-use crate::{akvp::kvtp::KvtpMessage, db::db::Db};
+use crate::{
+    akvp::kvtp::KvtpMessage,
+    db::{db::Db, entry::EntryType},
+};
+
+use super::base::{BaseCommand, KeyInfo};
 
 pub struct Get {
     kvtp: KvtpMessage,
 }
 
 impl Get {
-    pub fn new(kvtp: KvtpMessage) -> Self {
-        Get { kvtp }
-    }
-
-    pub fn execute(&self, db: &Db) -> Vec<u8> {
-        //println!("get::execute {}", self.kvtp.command);
-        let entry = db.get(self.kvtp.key.clone());
+    fn get_str(self, ki: KeyInfo, db: &Db) -> Vec<u8> {
+        let entry = db.get(ki.key);
         match entry {
             Some(val) => val.byt.unwrap(),
             None => "nil".as_bytes().to_vec(),
+        }
+    }
+
+    fn get_lst(self, ki: KeyInfo, db: &Db) -> Vec<u8> {
+        let entry = db.get(ki.key);
+        match entry {
+            Some(val) => {
+                let l = val.lst.unwrap();
+                let i: usize = ki.skey.parse::<usize>().unwrap();
+                l[i].clone()
+            }
+            None => "nil".as_bytes().to_vec(),
+        }
+    }
+
+    fn get_map(self, ki: KeyInfo, db: &Db) -> Vec<u8> {
+        let entry = db.get(ki.key);
+        match entry {
+            Some(val) => {
+                let hm = val.map.unwrap();
+                hm.get(ki.skey.as_str()).unwrap().clone()
+            }
+            None => "nil".as_bytes().to_vec(),
+        }
+    }
+
+    fn get_set(self, ki: KeyInfo, db: &Db) -> Vec<u8> {
+        let entry = db.get(ki.key);
+        match entry {
+            Some(val) => {
+                let hm = val.map.unwrap();
+                hm.get(self.kvtp.key.as_str()).unwrap().clone()
+            }
+            None => "nil".as_bytes().to_vec(),
+        }
+    }
+}
+
+impl BaseCommand for Get {
+    fn new(kvtp: KvtpMessage) -> Self {
+        Get { kvtp }
+    }
+
+    fn execute(self, db: &Db) -> Vec<u8> {
+        //println!("get::execute {}", self.kvtp.command);
+        let key_info = self.parse_key(&self.kvtp.key);
+        match key_info {
+            Ok(ki) => match ki.entry_type {
+                EntryType::STR => self.get_str(ki, db),
+                EntryType::LST => self.get_lst(ki, db),
+                EntryType::MAP => self.get_map(ki, db),
+                EntryType::SET => self.get_set(ki, db),
+            },
+            Err(e) => {
+                return e.to_string().as_bytes().to_vec();
+            }
         }
     }
 }

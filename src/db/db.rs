@@ -103,7 +103,7 @@ impl Db {
 
         let (page, bucket, slot) = self.locate_pbs(&key);
         let mut state = self.shared.state.lock().unwrap();
-        state.pages[page].buckets[bucket].slots[slot].insert(key, entry);
+        state.pages[page].buckets[bucket].slots[slot].insert(key.as_bytes().to_vec(), entry);
         //state.buckets[bucket].slots[slot].insert(key, entry);
 
         drop(state);
@@ -115,7 +115,7 @@ impl Db {
 
         let (page, bucket, slot) = self.locate_pbs(&key);
         let state = self.shared.state.lock().unwrap();
-        let entry = state.pages[page].buckets[bucket].slots[slot].get(&key);
+        let entry = state.pages[page].buckets[bucket].slots[slot].get(key.as_bytes());
 
         entry.cloned()
     }
@@ -198,7 +198,7 @@ impl Shared {
             }
 
             // The key expired, remove it
-            state.pages[1].buckets[1].slots[1].remove(key); // TODO: remove hardcode index
+            state.pages[1].buckets[1].slots[1].remove(key.as_bytes()); // TODO: remove hardcode index
             state.expirations.remove(&(when, key.clone()));
         }
 

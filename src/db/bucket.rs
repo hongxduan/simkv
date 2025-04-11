@@ -12,7 +12,7 @@ pub const SLOTS_PER_BUCKET: usize = 64;
 #[derive(Debug, Clone)]
 pub struct Bucket {
     id: u16,
-    pub slots: Vec<HashMap<String, Entry>>,
+    pub slots: Vec<HashMap<Vec<u8>, Entry>>,
     //slots: [HashMap<String, Vec<u8>>; SLOTS_PER_BUCKET],
 }
 
