@@ -21,7 +21,7 @@ impl BaseCommand for Set {
     }
 
     fn execute(self, db: &Db) -> Vec<u8> {
-        println!("set::execute {}", self.kvtp.command);
+        //println!("set::execute {}", self.kvtp.command);
         // TODO: parse key to determine data type
         let entry = Entry {
             vtype: crate::db::entry::EntryType::STR,

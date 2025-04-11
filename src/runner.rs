@@ -8,7 +8,7 @@ use std::sync::Arc;
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::{TcpListener, TcpStream},
-    sync::{Semaphore, broadcast},
+    sync::{Semaphore, broadcast, mpsc},
     time::{self, Duration},
 };
 
@@ -31,6 +31,9 @@ struct Listener {
 
     ///
     notify_shutdown: broadcast::Sender<()>,
+
+    //
+    shutdown_complete_tx: mpsc::Sender<()>,
 }
 
 #[derive(Debug)]
@@ -38,16 +41,19 @@ struct Handler {
     db: Db,
     socket: TcpStream,
     shutdown: Shutdown,
+    _shutdown_complete: mpsc::Sender<()>,
 }
 
 pub async fn run(listener: TcpListener, shutdown: impl Future) {
     // Initialize listener
     let (notify_shutdown, _) = broadcast::channel(1);
+    let (shutdown_complete_tx, mut shutdown_complete_rx) = mpsc::channel(1);
     let mut listener = Listener {
         listener,
         db_guard: DbDropGuard::new(),
         max_conns: Arc::new(Semaphore::new(100)), // will read from config
         notify_shutdown: notify_shutdown,
+        shutdown_complete_tx,
     };
 
     tokio::select! {
@@ -62,6 +68,17 @@ pub async fn run(listener: TcpListener, shutdown: impl Future) {
             println!("shutting down");
         }
     }
+
+    let Listener {
+        shutdown_complete_tx,
+        notify_shutdown,
+        ..
+    } = listener;
+
+    drop(notify_shutdown);
+    drop(shutdown_complete_tx);
+
+    let _ = shutdown_complete_rx.recv().await;
 }
 
 impl Listener {
@@ -74,6 +91,7 @@ impl Listener {
                 db: self.db_guard.db(),
                 socket,
                 shutdown: Shutdown::new(self.notify_shutdown.subscribe()),
+                _shutdown_complete: self.shutdown_complete_tx.clone(),
             };
             tokio::spawn(async move {
                 if let Err(err) = handler.run().await {
@@ -125,7 +143,6 @@ impl Handler {
             // Why this happen???
             if lbuf == [0, 0, 0, 0] {
                 continue;
-                //return Err("runner::Handler::run-emtpy");
             }
 
             //
@@ -170,6 +187,6 @@ impl Handler {
             //let _ = socket.write_all(&result).await;
             //let _ = socket.flush().await;
         }
-        return Ok(());
+        Ok(())
     }
 }
