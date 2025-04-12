@@ -2,19 +2,17 @@
 //!
 //! author: Duan HongXing
 //! date: 4 Apr, 2025
+//! 
 
-use db::db::Db;
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
-use tokio::net::{TcpListener, TcpStream};
+use tokio::net::TcpListener;
 use tokio::signal;
 
-use std::{env, vec};
+use std::env;
 
 mod db;
 
 mod akvp;
 mod cmd;
-use cmd::command::Command;
 
 mod runner;
 

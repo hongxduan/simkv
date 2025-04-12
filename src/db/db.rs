@@ -1,19 +1,19 @@
-///! In-Memory Database implement
-///!
-///! author: Duan HongXing
-///! date: 8 Apr, 2025
-///!
-///!
-///! Page:
-///!    Total 16 pages
-///!    Each page contain 64 bucket
-///!
-///! Bucket:
-///!    Total 1024 buckets, this is also the nodes limit
-///!
-///! Slot:
-///!    Each bucket contain 256 slots
-///!
+//! In-Memory Database implement
+//!
+//! author: Duan HongXing
+//! date: 8 Apr, 2025
+//!
+//!
+//! Page:
+//!    Total 16 pages
+//!    Each page contain 64 bucket
+//!
+//! Bucket:
+//!    Total 1024 buckets, this is also the nodes limit
+//!
+//! Slot:
+//!    Each bucket contain 256 slots
+//!
 use std::{
     collections::BTreeSet,
     sync::{Arc, Mutex},
@@ -118,6 +118,13 @@ impl Db {
         let entry = state.pages[page].buckets[bucket].slots[slot].get(key.as_bytes());
 
         entry.cloned()
+    }
+
+    pub fn del(&self, key: String) -> Option<Entry> {
+        let (page, bucket, slot) = self.locate_pbs(&key);
+        let mut state = self.shared.state.lock().unwrap();
+        let entry = state.pages[page].buckets[bucket].slots[slot].remove(&key.as_bytes().to_vec());
+        entry
     }
 
     ///

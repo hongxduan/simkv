@@ -31,7 +31,7 @@ impl Command {
         // Execute specific command
         let result = match self {
             Command::Get(get) => get.execute(db),
-            Command::Del(del) => del.execute(),
+            Command::Del(del) => del.execute(db),
             Command::Key(key) => key.execute(),
             Command::Set(set) => set.execute(db),
             Command::Ttl(ttl) => ttl.execute(db),

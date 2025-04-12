@@ -11,6 +11,10 @@ use crate::{
 };
 use regex::Regex;
 
+pub const OK: &[u8] = "Ok".as_bytes();
+pub const KEY_NOT_FOUND: &[u8] = "KEY_NOT_FOUND".as_bytes();
+pub const INVALID_KEY_FMT:&[u8] = "".as_bytes();
+
 const LST_KEY_PATTERN: &str = r"(?<key>.+)\[(?<skey>[^\[\]]+)\]$";
 const MAP_KEY_PATTERN: &str = r"(?<key>.+)\{(?<skey>[^\{\}]+)\}$";
 const SET_KEY_PATTERN: &str = r"(?<key>.+)<(?<skey>[^<>]+)>$";
