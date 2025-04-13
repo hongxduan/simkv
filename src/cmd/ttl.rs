@@ -1,20 +1,20 @@
-///! Ttl command implement
-///!
-///! author: Duan HongXing
-///! date: 4 Apr, 2025
-///!
-///! Command:
-///!     `ttl key`
-///!
-///! Examples:
-///!    ttl k1
-///!
-///! Return:
-///!    -2: expired
-///!    -1: never expire
-///!    >0: seconds to expire
-///!
-///!
+//! Ttl command implement
+//!
+//! author: Duan HongXing
+//! date: 4 Apr, 2025
+//!
+//! Command:
+//!     `ttl key`
+//!
+//! Examples:
+//!    ttl k1
+//!
+//! Return:
+//!    -2: expired
+//!    -1: never expire
+//!    >0: seconds to expire
+//!
+//!
 use crate::{akvp::kvtp::KvtpMessage, db::db::Db};
 
 use super::base::BaseCommand;

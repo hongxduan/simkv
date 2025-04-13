@@ -12,10 +12,12 @@ use crate::{
 use regex::Regex;
 
 pub const OK: &[u8] = "Ok".as_bytes();
-pub const KEY_NOT_FOUND: &[u8] = "KEY_NOT_FOUND".as_bytes();
-pub const INVALID_KEY_FMT:&[u8] = "".as_bytes();
+pub const KEY_NOT_EX: &[u8] = "KEY_NOT_EX".as_bytes();
+pub const INV_KEY_FMT: &[u8] = "INV_KEY_FMT".as_bytes();
+pub const INV_IDX: &[u8] = "INV_IDX".as_bytes(); // for list
+pub const INV_TYP: &[u8] = "INV_TYP".as_bytes();
 
-const LST_KEY_PATTERN: &str = r"(?<key>.+)\[(?<skey>[^\[\]]+)\]$";
+const LST_KEY_PATTERN: &str = r"(?<key>.+)\[(?<skey>[0-9.,]+)\]$";
 const MAP_KEY_PATTERN: &str = r"(?<key>.+)\{(?<skey>[^\{\}]+)\}$";
 const SET_KEY_PATTERN: &str = r"(?<key>.+)<(?<skey>[^<>]+)>$";
 

@@ -5,7 +5,7 @@
 //!
 use std::collections::HashMap;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum EntryType {
     STR,
     MAP,
@@ -16,7 +16,15 @@ pub enum EntryType {
 #[derive(Debug, Clone)]
 pub struct Entry {
     pub etype: EntryType,
-    pub byt: Option<Vec<u8>>,                  // String
-    pub map: Option<HashMap<String, Vec<u8>>>, // Map
-    pub lst: Option<Vec<Vec<u8>>>,             // List
+    pub data: EntryData,
+    //pub byt: Option<Vec<u8>>,                  // String
+    //pub map: Option<HashMap<String, Vec<u8>>>, // Map
+    //pub lst: Option<Vec<Vec<u8>>>,             // List
+}
+
+#[derive(Debug, Clone)]
+pub enum EntryData {
+    Byt(Vec<u8>),
+    Map(HashMap<String, Vec<u8>>),
+    Lst(Vec<Vec<u8>>),
 }
