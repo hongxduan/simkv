@@ -3,7 +3,7 @@
 //! author: Duan HongXing
 //! date: 6 Apr, 2025
 //!
-use std::collections::HashMap;
+use std::collections::{BTreeSet, HashMap, LinkedList};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum EntryType {
@@ -26,5 +26,7 @@ pub struct Entry {
 pub enum EntryData {
     Byt(Vec<u8>),
     Map(HashMap<String, Vec<u8>>),
-    Lst(Vec<Vec<u8>>),
+    //Lst(Vec<Vec<u8>>),
+    Lst(LinkedList<Vec<u8>>),
+    Set(BTreeSet<u8>),
 }

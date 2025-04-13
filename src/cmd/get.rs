@@ -57,18 +57,47 @@ impl Get {
         let idx_result = ki.skey.parse::<isize>();
         match entry {
             Some(entry) => match entry.data {
-                EntryData::Lst(l) => match idx_result {
+                EntryData::Lst(mut l) => match idx_result {
                     Ok(idx) => {
-                        let udx = idx as usize;
-                        println!("udx: {}, len:{}", udx, l.len());
-                        match l.get(udx) {
-                            Some(val) => {
-                                return val.to_vec();
+                        if idx == -1 {
+                            let entry_opt = l.pop_back();
+                            match entry_opt {
+                                Some(v) => {
+                                    return v;
+                                }
+                                None => {
+                                    return INV_IDX.to_vec();
+                                }
                             }
-                            None => {
-                                println!("get_list");
+                        } else if idx == 0 {
+                            let entry_opt = l.pop_front();
+                            match entry_opt {
+                                Some(v) => {
+                                    return v;
+                                }
+                                None => {
+                                    return INV_IDX.to_vec();
+                                }
+                            }
+                        } else if idx > 0 {
+                            let udx = idx as usize;
+                            if udx > l.len() {
                                 return INV_IDX.to_vec();
+                            } else {
+                                let mut tail = l.split_off(udx);
+                                let result_opt = tail.pop_front();
+                                l.append(&mut tail);
+                                match result_opt {
+                                    Some(v) => {
+                                        return v;
+                                    }
+                                    None => {
+                                        return INV_IDX.to_vec();
+                                    }
+                                }
                             }
+                        } else {
+                            return INV_IDX.to_vec();
                         }
                     }
                     Err(e) => {
@@ -76,7 +105,8 @@ impl Get {
                         return INV_IDX.to_vec();
                     }
                 },
-                _ => {
+                t => {
+                    println!("{:?}", t);
                     return INV_TYP.to_vec();
                 }
             },

@@ -4,6 +4,8 @@
 //! date: 4 Apr, 2025
 //!
 
+use std::collections::LinkedList;
+
 use crate::{
     akvp::kvtp::KvtpMessage,
     db::{
@@ -62,26 +64,22 @@ impl Set {
                         Ok(idx) => {
                             let mut udx: usize = 0;
                             if idx == -1 {
+                                l.push_back(self.kvtp.body);
+                            } else if idx == 0 {
+                                l.push_front(self.kvtp.body);
                             } else if idx >= 0 {
                                 udx = idx as usize;
+                                if udx >= l.len() {
+                                    l.push_back(self.kvtp.body);
+                                } else {
+                                    // Insert in the middle
+                                    let mut tail = l.split_off(udx);
+                                    l.push_back(self.kvtp.body);
+                                    l.append(&mut tail);
+                                }
                             } else {
                                 return INV_IDX.to_vec();
                             }
-                            println!("udx:{}", udx);
-                            // Entry type not match
-                            if entry.etype != EntryType::LST {
-                                return INV_TYP.to_vec();
-                            }
-
-                            println!("---");
-                            // TODO: body may container multi value
-                            //l.splice(udx..udx, [self.kvtp.body]);
-                            println!("len:{}", l.len());
-                            //l.insert(udx, self.kvtp.body);
-                            l.push(self.kvtp.body);
-                            //entry.data.insert(udx, self.kvtp.body);
-                            //entry.data = EntryData::Lst(l);
-                            //println!("len:{}", l.len());
                         }
                         Err(e) => {
                             println!("{}", e);
@@ -93,9 +91,11 @@ impl Set {
             },
             // New List
             None => {
+                let mut l: LinkedList<Vec<u8>> = LinkedList::new();
+                l.push_front(self.kvtp.body);
                 let entry = Entry {
                     etype: EntryType::LST,
-                    data: EntryData::Lst(vec![self.kvtp.body]),
+                    data: EntryData::Lst(l),
                 };
 
                 db.set(ki.key, entry);
