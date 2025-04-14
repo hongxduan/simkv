@@ -16,13 +16,14 @@ pub const KEY_NOT_EX: &[u8] = "KEY_NOT_EX".as_bytes();
 pub const INV_KEY_FMT: &[u8] = "INV_KEY_FMT".as_bytes();
 pub const INV_IDX: &[u8] = "INV_IDX".as_bytes(); // for list
 pub const INV_TYP: &[u8] = "INV_TYP".as_bytes();
+pub const INV_SUB_KEY_FMT: &[u8] = "INV_SUB_KEY_FMT".as_bytes();
 
 // users[1]
 // users[1..5]
 // users[#]
 // users[$1]
-// users[?tom]
-const LST_KEY_PATTERN: &str = r"(?<key>.+)\[(?<skey>(\d+|\d+..\d+|#|$\d+|\?[\[\]]+)+)\]$";
+// users[&tom]
+const LST_KEY_PATTERN: &str = r"(?<key>.+)\[(?<skey>(\d+|\d+..\d+|#|$\d+|\&[\[\]]+)+)\]$";
 //
 const MAP_KEY_PATTERN: &str = r"(?<key>.+)\{(?<skey>[^\{\}]+)\}$";
 //
