@@ -6,16 +6,16 @@
 use crate::akvp::kvtp::KvtpMessage;
 
 pub struct Key {
-    akvp: KvtpMessage,
+    kvtp: KvtpMessage,
 }
 
 impl Key {
-    pub fn new(akvp: KvtpMessage) -> Self {
-        Key { akvp }
+    pub fn new(kvtp: KvtpMessage) -> Self {
+        Key { kvtp }
     }
 
     pub fn execute(&self) -> Vec<u8> {
-        println!("{}", self.akvp.command);
+        println!("{}", self.kvtp.command);
 
         Vec::new()
     }

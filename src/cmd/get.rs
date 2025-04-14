@@ -35,30 +35,22 @@ impl Get {
         }
     }
 
-    ///
-    /// Get first(POP Left)
-    ///     `get users[0]`
-    ///
-    /// Get last(POP Right)
-    ///     `get users[-1]`
-    ///
-    /// Get any
-    ///     - Return the fifth entry
-    ///     `get users[4]`
-    /// Get range(Slice)
-    ///     - Return entries from index 1 to 4
-    ///     `get users[1:5]`
-    ///     - Return entries from index 1 to last
-    ///     `get users[1:-1]`
+
     ///
     ///
+    /// 
+    /// 
+    /// 
+    /// 
     fn get_lst(self, ki: KeyInfo, db: &Db) -> Vec<u8> {
-        let entry = db.get(ki.key);
+        let entry_opt = db.get(ki.key);
+        // TODO: the skey can be not number
         let idx_result = ki.skey.parse::<isize>();
-        match entry {
+        match entry_opt {
             Some(entry) => match entry.data {
                 EntryData::Lst(mut l) => match idx_result {
                     Ok(idx) => {
+                        println!("get_lst- {}, {}", idx, l.len());
                         if idx == -1 {
                             let entry_opt = l.pop_back();
                             match entry_opt {
@@ -114,6 +106,12 @@ impl Get {
         }
     }
 
+    ///
+    /// 
+    /// 
+    /// 
+    /// 
+    /// 
     fn get_map(self, ki: KeyInfo, db: &Db) -> Vec<u8> {
         /*let entry = db.get(ki.key);
         match entry {
@@ -126,6 +124,13 @@ impl Get {
         "nil".as_bytes().to_vec()
     }
 
+    ///
+    /// 
+    /// 
+    /// 
+    /// 
+    /// 
+    /// 
     fn get_set(self, ki: KeyInfo, db: &Db) -> Vec<u8> {
         /*let entry = db.get(ki.key);
         match entry {
@@ -139,6 +144,13 @@ impl Get {
     }
 }
 
+///
+/// 
+/// 
+/// 
+/// 
+/// 
+/// 
 impl BaseCommand for Get {
     fn new(kvtp: KvtpMessage) -> Self {
         Get { kvtp }
