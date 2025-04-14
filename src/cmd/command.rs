@@ -55,7 +55,7 @@ impl Command {
         // Parse KVTP
         let kvtp = KvtpMessage::parse(&message).unwrap();
 
-        println!("parse_command:{:?}", kvtp);
+        //println!("parse_command:{:?}", kvtp);
 
         // Get the string command
         let ref str_cmd = kvtp.command;

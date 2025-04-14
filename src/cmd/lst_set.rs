@@ -3,7 +3,6 @@
 //! author: Duan HongXing
 //! date: 14 Apr, 2025
 //!
-
 use std::collections::LinkedList;
 
 use regex::Regex;
@@ -24,7 +23,6 @@ impl LstSet {
     pub fn set(kvtp: KvtpMessage, ki: KeyInfo, db: &Db) -> Vec<u8> {
         let entry_opt = db.get(ki.key.clone());
         let lst_skey_result = LstSetSubKey::parse(&ki.skey);
-
         match lst_skey_result {
             Ok(lsk) => {
                 match entry_opt {
@@ -32,8 +30,9 @@ impl LstSet {
                     Some(mut entry) => match entry.data {
                         EntryData::Lst(mut l) => {
                             match lsk {
-                                // If purely Number in the bracket
+                                // If purely Numbers in the bracket
                                 // Push front or Push back base on the Number
+                                // Or insert in the middle
                                 LstSetSubKey::Number(idx) => {
                                     if idx == -1 {
                                         l.push_back(kvtp.body);
@@ -41,7 +40,6 @@ impl LstSet {
                                         l.push_front(kvtp.body);
                                     } else if idx >= 0 {
                                         let udx = idx as usize;
-                                        println!("udx:{}", udx);
                                         if udx >= l.len() {
                                             l.push_back(kvtp.body);
                                         } else {
@@ -56,10 +54,30 @@ impl LstSet {
 
                                     // Need set back, or else the set not works
                                     entry.data = EntryData::Lst(l);
-                                    db.set(ki.key.clone(), entry);
+                                    db.set(ki.key, entry);
                                 }
-                                // Insert into list
-                                LstSetSubKey::Dollar(idx) => {}
+                                //
+                                // Replace
+                                LstSetSubKey::Dollar(idx) => {
+                                    let mut udx: usize = 0;
+                                    if idx < 0 && (idx.abs() as usize) <= l.len() {
+                                        udx = ((l.len() as isize) + (idx as isize)) as usize;
+                                    } else if idx >= 0 {
+                                        udx = idx as usize;
+                                    } else {
+                                        // Error
+                                        return INV_IDX.to_vec();
+                                    }
+
+                                    let mut tail = l.split_off(udx);
+                                    let old = tail.pop_front(); // remove old
+                                    l.push_back(kvtp.body); // append new
+                                    l.append(&mut tail);
+
+                                    entry.data = EntryData::Lst(l);
+                                    db.set(ki.key, entry);
+                                    return old.unwrap();
+                                }
                             }
                         }
                         _ => {
@@ -88,6 +106,7 @@ impl LstSet {
     }
 }
 
+#[derive(Debug)]
 pub enum LstSetSubKey {
     Number(i32), // [5]       purely number
     //Range((i32, i32)), // [1..5]    Range
@@ -96,14 +115,13 @@ pub enum LstSetSubKey {
                  //Hash(()),          // [#]       Get length
 }
 
-const PATTERN_NUMBER: &str = r"\d+";
-//const PATTERN_RANGE: &str = r"(?<start>\d+)\.\.(?<end>\d+)";
-const PATTERN_DOLLAR: &str = r"^$(?<index>\d+)";
-//const PATTERN_AMPERSAND: &str = r"^&(?<value>[\[]]]+)";
-//const PATTERN_HASH: &str = r"#";
+const PATTERN_NUMBER: &str = r"^[0-9]+$";
+const PATTERN_DOLLAR: &str = r"^\$(?<index>[0-9]+$)";
 
 ///
-///
+/// Parse Sub Key in the bracket
+/// 1. Purely numbers
+/// 2. $numbers
 ///
 impl LstSetSubKey {
     ///
@@ -114,14 +132,10 @@ impl LstSetSubKey {
         let re_dollar = Regex::new(PATTERN_DOLLAR).unwrap();
 
         if re_number.is_match(skey) {
-            println!("LstSetSubKey::parse: number: {}", skey);
             Ok(LstSetSubKey::Number(skey.parse::<i32>().unwrap()))
         } else if re_dollar.is_match(skey) {
             match re_dollar.captures(skey) {
-                Some(caps) => {
-                    println!("LstSetSubKey::parse: dollar: {}", &caps["index"]);
-                    Ok(LstSetSubKey::Dollar(caps["index"].parse::<i32>().unwrap()))
-                }
+                Some(caps) => Ok(LstSetSubKey::Dollar(caps["index"].parse::<i32>().unwrap())),
                 _ => Err(KeyError),
             }
         } else {
