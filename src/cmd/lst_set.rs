@@ -115,8 +115,8 @@ pub enum LstSetSubKey {
                  //Hash(()),          // [#]       Get length
 }
 
-const PATTERN_NUMBER: &str = r"^[0-9]+$";
-const PATTERN_DOLLAR: &str = r"^\$(?<index>[0-9]+$)";
+const PATTERN_NUMBER: &str = r"^-?[0-9]+$";
+const PATTERN_DOLLAR: &str = r"^\$(?<index>-?[0-9]+$)";
 
 ///
 /// Parse Sub Key in the bracket
