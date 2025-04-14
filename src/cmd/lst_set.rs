@@ -15,7 +15,7 @@ use crate::{
     },
 };
 
-use super::base::{INV_IDX, INV_SUB_KEY_FMT, INV_TYP, KeyError, KeyInfo, OK};
+use super::base::{INV_IDX, INV_SUB_KEY_FMT, INV_TYP, KeyError, KeyInfo, OK, PATTERN_NUMBER};
 
 pub struct LstSet;
 
@@ -115,7 +115,6 @@ pub enum LstSetSubKey {
                  //Hash(()),          // [#]       Get length
 }
 
-const PATTERN_NUMBER: &str = r"^-?[0-9]+$";
 const PATTERN_DOLLAR: &str = r"^\$(?<index>-?[0-9]+$)";
 
 ///

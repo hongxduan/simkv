@@ -23,11 +23,15 @@ pub const INV_SUB_KEY_FMT: &[u8] = "INV_SUB_KEY_FMT".as_bytes();
 // users[#]
 // users[$1]
 // users[&tom]
-const LST_KEY_PATTERN: &str = r"(?<key>.+)\[(?<skey>(-?[0-9]+|-?[0-9]+\.\.-?[0-9]+|#|\$-?[0-9]+|\&[\[\]]+)+)\]$";
+const LST_KEY_PATTERN: &str =
+    r"(?<key>.+)\[(?<skey>(-?[0-9]+|-?[0-9]+\.\.-?[0-9]+|#|\$-?[0-9]+|\&[\[\]]+)+)\]$";
 //
 const MAP_KEY_PATTERN: &str = r"(?<key>.+)\{(?<skey>[^\{\}]+)\}$";
 //
 const SET_KEY_PATTERN: &str = r"(?<key>.+)<(?<skey>[^<>]+)>$";
+
+// Pattern to match Numbers only
+pub const PATTERN_NUMBER: &str = r"^-?[0-9]+$";
 
 pub struct KeyInfo {
     pub entry_type: EntryType,

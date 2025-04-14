@@ -6,7 +6,7 @@
 
 use regex::Regex;
 
-use super::base::KeyError;
+use super::base::{KeyError, PATTERN_NUMBER};
 
 pub enum LstGetSubKey {
     Number(i32),       // [5]       purely number
@@ -15,8 +15,7 @@ pub enum LstGetSubKey {
     Hash(()),          // [#]       Get length
 }
 
-const PATTERN_NUMBER: &str = r"\d+";
-const PATTERN_RANGE: &str = r"(?<start>\d+)\.\.(?<end>\d+)";
+const PATTERN_RANGE: &str = r"(?<start>-?[0-9]+)\.\.(?<end>-?[0-9]+)";
 const PATTERN_AMPERSAND: &str = r"^&(?<value>[\[]]]+)";
 //const PATTERN_HASH: &str = r"#";
 

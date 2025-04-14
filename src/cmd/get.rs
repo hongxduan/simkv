@@ -35,13 +35,12 @@ impl Get {
         }
     }
 
-
     ///
     ///
-    /// 
-    /// 
-    /// 
-    /// 
+    ///
+    ///
+    ///
+    ///
     fn get_lst(self, ki: KeyInfo, db: &Db) -> Vec<u8> {
         let entry_opt = db.get(ki.key);
         // TODO: the skey can be not number
@@ -50,7 +49,7 @@ impl Get {
             Some(entry) => match entry.data {
                 EntryData::Lst(mut l) => match idx_result {
                     Ok(idx) => {
-                        println!("get_lst- {}, {}", idx, l.len());
+                        //println!("get_lst- {}, {}", idx, l.len());
                         if idx == -1 {
                             let entry_opt = l.pop_back();
                             match entry_opt {
@@ -107,11 +106,11 @@ impl Get {
     }
 
     ///
-    /// 
-    /// 
-    /// 
-    /// 
-    /// 
+    ///
+    ///
+    ///
+    ///
+    ///
     fn get_map(self, ki: KeyInfo, db: &Db) -> Vec<u8> {
         /*let entry = db.get(ki.key);
         match entry {
@@ -125,12 +124,12 @@ impl Get {
     }
 
     ///
-    /// 
-    /// 
-    /// 
-    /// 
-    /// 
-    /// 
+    ///
+    ///
+    ///
+    ///
+    ///
+    ///
     fn get_set(self, ki: KeyInfo, db: &Db) -> Vec<u8> {
         /*let entry = db.get(ki.key);
         match entry {
@@ -145,12 +144,12 @@ impl Get {
 }
 
 ///
-/// 
-/// 
-/// 
-/// 
-/// 
-/// 
+///
+///
+///
+///
+///
+///
 impl BaseCommand for Get {
     fn new(kvtp: KvtpMessage) -> Self {
         Get { kvtp }
