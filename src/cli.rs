@@ -56,10 +56,10 @@ fn main() {
                         // TODO: loop
                         let len_result = stream.read(&mut buf);
                         match len_result {
-                            Ok(len) => {
+                            Ok(_) => {
                                 parse_kvtp_response(buf.to_vec());
                                 //println!("{},{:?}", len, String::from_utf8(buf[0..len].to_vec()));
-                                println!("{}", String::from_utf8(buf[0..len].to_vec()).unwrap());
+                                //println!("{}", String::from_utf8(buf[0..len].to_vec()).unwrap());
                             }
                             Err(e) => {
                                 println!("{:?}", e);

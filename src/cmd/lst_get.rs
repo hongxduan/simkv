@@ -62,9 +62,7 @@ impl LstGet {
                                                 return KvtpResponse::build_string(v);
                                             }
                                             None => {
-                                                return KvtpResponse::build_err(
-                                                    INV_IDX.to_vec(),
-                                                );
+                                                return KvtpResponse::build_err(INV_IDX.to_vec());
                                             }
                                         }
                                     }
@@ -127,20 +125,13 @@ impl LstGetSubKey {
         //let re_hash = Regex::new(PATTERN_HASH).unwrap();
 
         if re_number.is_match(skey) {
-            println!("LstSubKey::parse: number: {}", skey);
             Ok(LstGetSubKey::Number(skey.parse::<i32>().unwrap()))
         } else if re_range.is_match(skey) {
             match re_range.captures(skey) {
-                Some(caps) => {
-                    println!(
-                        "LstSubKey::parse: range: {},{}",
-                        &caps["start"], &caps["end"]
-                    );
-                    Ok(LstGetSubKey::Range((
-                        caps["start"].parse::<i32>().unwrap(),
-                        caps["end"].parse::<i32>().unwrap(),
-                    )))
-                }
+                Some(caps) => Ok(LstGetSubKey::Range((
+                    caps["start"].parse::<i32>().unwrap(),
+                    caps["end"].parse::<i32>().unwrap(),
+                ))),
                 _ => Err(KeyError),
             }
         } else if re_ampersand.is_match(skey) {

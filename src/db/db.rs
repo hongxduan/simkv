@@ -12,7 +12,7 @@
 //!    Total 1024 buckets, this is also the nodes limit
 //!
 //! Slot:
-//!    Each bucket contain 256 slots
+//!    Each bucket contain BUCKETS_PER_PAGE slots
 //!
 use std::{
     collections::BTreeSet,
@@ -142,7 +142,7 @@ impl Db {
         let bucket_id = (crc16.checksum(key.as_bytes()) % (BUCKET_NUM as u16)) as usize;
         let page = bucket_id / BUCKETS_PER_PAGE; // 155 / 64 = 2.42 = 2 => page2
         let bucket = bucket_id % BUCKETS_PER_PAGE; // 155 % 64 = 27 => page2.buckets[27]
-        let slot = bucket_id % SLOTS_PER_BUCKET; // 155 % 256 = 155 => page2.buckets[27].slot[155]
+        let slot = bucket_id % SLOTS_PER_BUCKET; // 155 % 64 = 27 => page2.buckets[27].slot[27]
 
         (page, bucket, slot)
     }
