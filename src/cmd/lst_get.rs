@@ -7,7 +7,7 @@
 use regex::Regex;
 
 use crate::{
-    akvp::kvtp::KvtpMessage,
+    kvtp::kvtp::KvtpMessage,
     cmd::base::INV_TYP,
     db::{db::Db, entry::EntryData},
 };
@@ -72,6 +72,7 @@ impl LstGet {
                             }
                             // Find value index in the list
                             LstGetSubKey::Ampersand(value) => {
+
                                 return INV_IDX.to_vec();
                             }
                             // Get list length

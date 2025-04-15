@@ -5,7 +5,7 @@
 //!
 //! Get value by Key
 use crate::{
-    akvp::kvtp::KvtpMessage,
+    kvtp::kvtp::KvtpMessage,
     db::{db::Db, entry::EntryType},
 };
 

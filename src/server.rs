@@ -11,7 +11,7 @@ use std::env;
 
 mod db;
 
-mod akvp;
+mod kvtp;
 mod cmd;
 
 mod runner;

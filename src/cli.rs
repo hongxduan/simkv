@@ -1,8 +1,8 @@
-///! simkv-cli
-///!
-///! author: Duan HongXing
-///! date: 4 Apr, 2025
-///!
+//! simkv-cli
+//!
+//! author: Duan HongXing
+//! date: 4 Apr, 2025
+//!
 use clap::{ArgAction, Parser};
 use std::io::Write;
 use std::io::{self, Read};
@@ -58,7 +58,8 @@ fn main() {
                         match len_result {
                             Ok(len) => {
                                 parse_kvtp_response(buf.to_vec());
-                                println!("{},{:?}", len, String::from_utf8(buf[0..len].to_vec()));
+                                //println!("{},{:?}", len, String::from_utf8(buf[0..len].to_vec()));
+                                println!("{}", String::from_utf8(buf[0..len].to_vec()).unwrap());
                             }
                             Err(e) => {
                                 println!("{:?}", e);

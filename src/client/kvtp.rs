@@ -1,8 +1,8 @@
-///! Cli module
-///!
-///! author: Duan HongXing
-///! date: 7 Apr, 2025
-///!
+//! Cli module
+//!
+//! author: Duan HongXing
+//! date: 7 Apr, 2025
+//!
 use crate::client::client::InputData;
 
 const LINE_FEED: u8 = b'\n'; // 0xA

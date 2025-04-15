@@ -4,7 +4,7 @@
 //! date: 14 Apr, 2025
 //!
 
-use crate::akvp::kvtp::KvtpMessage;
+use crate::kvtp::kvtp::KvtpMessage;
 use crate::cmd::base::KeyInfo;
 use crate::db::db::Db;
 use crate::db::entry::{Entry, EntryData, EntryType};

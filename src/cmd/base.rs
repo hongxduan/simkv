@@ -6,7 +6,7 @@
 use core::fmt;
 
 use crate::{
-    akvp::kvtp::KvtpMessage,
+    kvtp::kvtp::KvtpMessage,
     db::{db::Db, entry::EntryType},
 };
 use regex::Regex;

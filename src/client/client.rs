@@ -1,8 +1,8 @@
-///! Cli module
-///!
-///! author: Duan HongXing
-///! date: 7 Apr, 2025
-///!
+//! Cli module
+//!
+//! author: Duan HongXing
+//! date: 7 Apr, 2025
+//!
 
 const SPACE_CHAR: char = ' ';
 const BQUOTE_CHAR: char = '\\';

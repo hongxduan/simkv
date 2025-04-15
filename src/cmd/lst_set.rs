@@ -8,7 +8,7 @@ use std::collections::LinkedList;
 use regex::Regex;
 
 use crate::{
-    akvp::kvtp::KvtpMessage,
+    kvtp::kvtp::KvtpMessage,
     db::{
         db::Db,
         entry::{Entry, EntryData, EntryType},

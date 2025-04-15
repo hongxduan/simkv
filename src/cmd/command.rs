@@ -10,7 +10,7 @@ use super::key::Key;
 use super::set::Set;
 use super::ttl::Ttl;
 use super::unknown::Unknown;
-use crate::akvp::kvtp::KvtpMessage;
+use crate::kvtp::kvtp::KvtpMessage;
 use crate::db::db::Db;
 
 pub enum Command {
