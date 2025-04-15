@@ -25,8 +25,7 @@ pub struct Entry {
 #[derive(Debug, Clone)]
 pub enum EntryData {
     Byt(Vec<u8>),
-    Map(HashMap<String, Vec<u8>>),
-    //Lst(Vec<Vec<u8>>),
+    //Map(HashMap<String, Vec<u8>>),
     Lst(LinkedList<Vec<u8>>),
-    Set(BTreeSet<u8>),
+    //Set(BTreeSet<u8>),
 }

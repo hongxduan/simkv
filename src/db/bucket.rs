@@ -33,11 +33,6 @@ impl Bucket {
         bucket
     }
 
-    pub fn calc_bucket_id(key: &str) -> usize {
-        let crc16: crc::Crc<u16> = crc::Crc::<u16>::new(&crc::CRC_16_XMODEM);
-        (crc16.checksum(key.as_bytes()) % (BUCKETS_PER_PAGE as u16)) as usize
-    }
-
     /*
     fn locate_bucket(self: &Self, key: u16) -> Box<Bucket> {
         if key < self.key {
