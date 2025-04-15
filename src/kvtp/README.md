@@ -33,8 +33,8 @@ Body is squence of bytes, body may container multiple items
 
 ## Response
 ```
-KVTP/1 OK|ERR       ...... Protocol and Status(Must be the first line)
-DTYPE: I|L|D...     ...... Data type
+KVTP/1 OK|ERR       ...... Protocol and Status (Must be the first line)
+I|L|D...            ...... Data type (Must second line)
                     ...... Empty line(Header Body separator)
 Body                ...... Body
 ```

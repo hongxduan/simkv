@@ -5,8 +5,8 @@
 //!
 
 use crate::{
-    kvtp::kvtp::KvtpMessage,
     db::{db::Db, entry::EntryData},
+    kvtp::{kvtp::KvtpMessage, response::KvtpResponse},
 };
 
 use super::base::{INV_TYP, KEY_NOT_EX, KeyInfo};
@@ -19,13 +19,13 @@ impl StrGet {
         match entry {
             Some(entry) => match entry.data {
                 EntryData::Byt(val) => {
-                    return val;
+                    return KvtpResponse::build_string(val);
                 }
                 _ => {
-                    return INV_TYP.to_vec();
+                    return KvtpResponse::build_string(INV_TYP.to_vec());
                 }
             },
-            None => KEY_NOT_EX.to_vec(),
+            None => KvtpResponse::build_string(KEY_NOT_EX.to_vec()),
         }
     }
 }

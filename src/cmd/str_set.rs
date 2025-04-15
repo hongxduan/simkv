@@ -8,6 +8,7 @@ use crate::kvtp::kvtp::KvtpMessage;
 use crate::cmd::base::KeyInfo;
 use crate::db::db::Db;
 use crate::db::entry::{Entry, EntryData, EntryType};
+use crate::kvtp::response::KvtpResponse;
 
 use super::base::OK;
 
@@ -22,6 +23,6 @@ impl StrSet {
                                                      //lst: None,
         };
         db.set(ki.key, entry);
-        OK.to_vec()
+        KvtpResponse::build_string(OK.to_vec())
     }
 }

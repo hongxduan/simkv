@@ -7,9 +7,9 @@
 use regex::Regex;
 
 use crate::{
-    kvtp::kvtp::KvtpMessage,
     cmd::base::INV_TYP,
     db::{db::Db, entry::EntryData},
+    kvtp::{kvtp::KvtpMessage, response::KvtpResponse},
 };
 
 use super::base::{INV_IDX, INV_SUB_KEY_FMT, KEY_NOT_EX, KeyError, KeyInfo, PATTERN_NUMBER};
@@ -17,7 +17,7 @@ use super::base::{INV_IDX, INV_SUB_KEY_FMT, KEY_NOT_EX, KeyError, KeyInfo, PATTE
 pub struct LstGet;
 
 impl LstGet {
-    pub fn get(kvtp: KvtpMessage, ki: KeyInfo, db: &Db) -> Vec<u8> {
+    pub fn get(_: KvtpMessage, ki: KeyInfo, db: &Db) -> Vec<u8> {
         let entry_opt = db.get(ki.key);
         // TODO: the skey can be not number
         //let idx_result = ki.skey.parse::<isize>();
@@ -33,68 +33,70 @@ impl LstGet {
                                     let entry_opt = l.pop_back();
                                     match entry_opt {
                                         Some(v) => {
-                                            return v;
+                                            return KvtpResponse::build_string(v);
                                         }
                                         None => {
-                                            return INV_IDX.to_vec();
+                                            return KvtpResponse::build_err(INV_IDX.to_vec());
                                         }
                                     }
                                 } else if idx == 0 {
                                     let entry_opt = l.pop_front();
                                     match entry_opt {
                                         Some(v) => {
-                                            return v;
+                                            return KvtpResponse::build_string(v);
                                         }
                                         None => {
-                                            return INV_IDX.to_vec();
+                                            return KvtpResponse::build_err(INV_IDX.to_vec());
                                         }
                                     }
                                 } else if idx > 0 {
                                     let udx = idx as usize;
                                     if udx > l.len() {
-                                        return INV_IDX.to_vec();
+                                        return KvtpResponse::build_err(INV_IDX.to_vec());
                                     } else {
                                         let mut tail = l.split_off(udx);
                                         let result_opt = tail.pop_front();
                                         l.append(&mut tail);
                                         match result_opt {
                                             Some(v) => {
-                                                return v;
+                                                return KvtpResponse::build_string(v);
                                             }
                                             None => {
-                                                return INV_IDX.to_vec();
+                                                return KvtpResponse::build_err(
+                                                    INV_IDX.to_vec(),
+                                                );
                                             }
                                         }
                                     }
                                 } else {
-                                    return INV_IDX.to_vec();
+                                    return KvtpResponse::build_err(INV_IDX.to_vec());
                                 }
                             }
                             // Find value index in the list
                             LstGetSubKey::Ampersand(value) => {
-
-                                return INV_IDX.to_vec();
+                                return KvtpResponse::build_err(INV_IDX.to_vec());
                             }
                             // Get list length
                             LstGetSubKey::Hash(()) => {
                                 let len = l.len();
-                                return len.to_string().as_bytes().to_vec()
+                                return KvtpResponse::build_integer(len as i32);
                             }
                             // Get all list elements in the range
                             LstGetSubKey::Range((start, end)) => {
-                                return INV_IDX.to_vec();
+                                return KvtpResponse::build_err(INV_IDX.to_vec());
                             }
                         },
                         t => {
                             println!("{:?}", t);
-                            return INV_TYP.to_vec();
+                            return KvtpResponse::build_err(INV_TYP.to_vec());
                         }
                     },
-                    None => KEY_NOT_EX.to_vec(),
+                    None => KvtpResponse::build_err(KEY_NOT_EX.to_vec()),
                 }
             }
             Err(e) => {
-                return INV_SUB_KEY_FMT.to_vec();
+                println!("{}", e);
+                return KvtpResponse::build_err(INV_SUB_KEY_FMT.to_vec());
             }
         }
     }

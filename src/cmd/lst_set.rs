@@ -8,11 +8,11 @@ use std::collections::LinkedList;
 use regex::Regex;
 
 use crate::{
-    kvtp::kvtp::KvtpMessage,
     db::{
         db::Db,
         entry::{Entry, EntryData, EntryType},
     },
+    kvtp::{kvtp::KvtpMessage, response::KvtpResponse},
 };
 
 use super::base::{INV_IDX, INV_SUB_KEY_FMT, INV_TYP, KeyError, KeyInfo, OK, PATTERN_NUMBER};
@@ -49,7 +49,7 @@ impl LstSet {
                                             l.append(&mut tail);
                                         }
                                     } else {
-                                        return INV_IDX.to_vec();
+                                        return KvtpResponse::build_string(INV_IDX.to_vec());
                                     }
 
                                     // Need set back, or else the set not works
@@ -66,7 +66,7 @@ impl LstSet {
                                         udx = idx as usize;
                                     } else {
                                         // Error
-                                        return INV_IDX.to_vec();
+                                        return KvtpResponse::build_string(INV_IDX.to_vec());
                                     }
 
                                     let mut tail = l.split_off(udx);
@@ -76,12 +76,12 @@ impl LstSet {
 
                                     entry.data = EntryData::Lst(l);
                                     db.set(ki.key, entry);
-                                    return old.unwrap();
+                                    return KvtpResponse::build_string(old.unwrap());
                                 }
                             }
                         }
                         _ => {
-                            return INV_TYP.to_vec();
+                            return KvtpResponse::build_string(INV_TYP.to_vec());
                         }
                     },
                     // New List
@@ -98,11 +98,12 @@ impl LstSet {
                 }
             }
             Err(e) => {
-                return INV_SUB_KEY_FMT.to_vec();
+                println!("LstSet::set- {}", e);
+                return KvtpResponse::build_err(INV_SUB_KEY_FMT.to_vec());
             }
         }
 
-        OK.to_vec()
+        KvtpResponse::build_string(OK.to_vec())
     }
 }
 
