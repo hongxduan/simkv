@@ -4,6 +4,8 @@
 //! date: 14 Apr, 2025
 //!
 
+use std::collections::LinkedList;
+
 use regex::Regex;
 
 use crate::{
@@ -28,47 +30,7 @@ impl LstGet {
                     Some(entry) => match entry.data {
                         EntryData::Lst(mut l) => match lsk {
                             LstGetSubKey::Number(idx) => {
-                                //println!("get_lst- {}, {}", idx, l.len());
-                                if idx == -1 {
-                                    let entry_opt = l.pop_back();
-                                    match entry_opt {
-                                        Some(v) => {
-                                            return KvtpResponse::build_string(v);
-                                        }
-                                        None => {
-                                            return KvtpResponse::build_err(INV_IDX.to_vec());
-                                        }
-                                    }
-                                } else if idx == 0 {
-                                    let entry_opt = l.pop_front();
-                                    match entry_opt {
-                                        Some(v) => {
-                                            return KvtpResponse::build_string(v);
-                                        }
-                                        None => {
-                                            return KvtpResponse::build_err(INV_IDX.to_vec());
-                                        }
-                                    }
-                                } else if idx > 0 {
-                                    let udx = idx as usize;
-                                    if udx > l.len() {
-                                        return KvtpResponse::build_err(INV_IDX.to_vec());
-                                    } else {
-                                        let mut tail = l.split_off(udx);
-                                        let result_opt = tail.pop_front();
-                                        l.append(&mut tail);
-                                        match result_opt {
-                                            Some(v) => {
-                                                return KvtpResponse::build_string(v);
-                                            }
-                                            None => {
-                                                return KvtpResponse::build_err(INV_IDX.to_vec());
-                                            }
-                                        }
-                                    }
-                                } else {
-                                    return KvtpResponse::build_err(INV_IDX.to_vec());
-                                }
+                                return get_by_index(&mut l, idx);
                             }
                             // Find value index in the list
                             LstGetSubKey::Ampersand(value) => {
@@ -86,7 +48,8 @@ impl LstGet {
                             }
                             // Get all list elements in the range
                             LstGetSubKey::Range((start, end)) => {
-                                return KvtpResponse::build_err(INV_IDX.to_vec());
+                                return get_range(&mut l, start, end);
+                                //return KvtpResponse::build_err(INV_IDX.to_vec());
                             }
                         },
                         t => {
@@ -104,6 +67,75 @@ impl LstGet {
         }
     }
 }
+
+fn get_by_index(l: &mut LinkedList<Vec<u8>>, idx: i32) -> Vec<u8> {
+    //println!("get_lst- {}, {}", idx, l.len());
+    if idx == -1 {
+        let entry_opt = l.pop_back();
+        match entry_opt {
+            Some(v) => {
+                return KvtpResponse::build_string(v);
+            }
+            None => {
+                return KvtpResponse::build_err(INV_IDX.to_vec());
+            }
+        }
+    } else if idx == 0 {
+        let entry_opt = l.pop_front();
+        match entry_opt {
+            Some(v) => {
+                return KvtpResponse::build_string(v);
+            }
+            None => {
+                return KvtpResponse::build_err(INV_IDX.to_vec());
+            }
+        }
+    } else if idx > 0 {
+        let udx = idx as usize;
+        if udx > l.len() {
+            return KvtpResponse::build_err(INV_IDX.to_vec());
+        } else {
+            let mut tail = l.split_off(udx);
+            let result_opt = tail.pop_front();
+            l.append(&mut tail);
+            match result_opt {
+                Some(v) => {
+                    return KvtpResponse::build_string(v);
+                }
+                None => {
+                    return KvtpResponse::build_err(INV_IDX.to_vec());
+                }
+            }
+        }
+    } else {
+        return KvtpResponse::build_err(INV_IDX.to_vec());
+    }
+}
+
+fn get_range(l: &mut LinkedList<Vec<u8>>, start: i32, end: i32) -> Vec<u8> {
+    let mut values: Vec<Vec<u8>> = Vec::new();
+
+    let mut start_u: usize = 0;
+    let mut end_u: usize = 0;
+
+    // TODO: convert start, end
+    start_u = start as usize;
+    end_u = end as usize;
+
+    println!("{},{}", start_u, end_u);
+
+    let mut middle = l.split_off(start_u);
+    // Because len of middle f.len() - start_u, so the split must orginal end_u minus start_u
+    let mut tail = middle.split_off(end_u - start_u);
+
+    for (_, value) in middle.iter().enumerate() {
+        values.push(value.to_vec());
+    }
+    println!("{:?}", values);
+    return KvtpResponse::build_list_string(values);
+}
+
+/*---------------------------------------------------------------------------*/
 
 pub enum LstGetSubKey {
     Number(i32),        // [5]       purely number

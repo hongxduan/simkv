@@ -93,7 +93,8 @@ pub fn build_kvtp_message(input_data: InputData) -> Vec<u8> {
     }
 
     let mut akvp: Vec<u8> = Vec::new();
-    let len = message.len();
+    // Make sure the length bytes is 4
+    let len = message.len() as u32;
     for b in len.to_be_bytes() {
         akvp.push(b);
     }
@@ -196,7 +197,31 @@ pub fn parse_kvtp_response(response: Vec<u8>) {
         DTYPE_LI => {}
         DTYPE_LL => {}
         DTYPE_LD => {}
-        DTYPE_LS => {}
+        DTYPE_LS => {
+            print_status(status, false);
+            let total_len = body.len();
+            let mut i = 0;
+            let mut line_num = 1;
+            while i < total_len - 4 {
+                // Ready 4 bytes to get item length
+                let len_bytes: [u8; 4] = [body[i], body[i + 1], body[i + 2], body[i + 3]];
+                let len = u32::from_be_bytes(len_bytes);
+                i += 4;
+                let end = i + (len as usize);
+                let value_result = String::from_utf8(body[i..end].to_vec());
+                match value_result {
+                    Ok(value) => {
+                        println!("{}:{}", line_num, value);
+                    }
+                    Err(_) => {
+                        println!("Unknow error");
+                    }
+                }
+
+                i = end;
+                line_num += 1;
+            }
+        }
         DTYPE_M => {}
         _ => {}
     }

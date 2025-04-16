@@ -115,8 +115,27 @@ impl KvtpResponse {
         return response;
     }
 
-    pub fn build_list_string() -> Vec<u8> {
-        let response: Vec<u8> = Vec::new();
+    pub fn build_list_string(values: Vec<Vec<u8>>) -> Vec<u8> {
+        let mut response: Vec<u8> = Vec::new();
+        //1. Protocol and Status
+        Self::append_ok(&mut response);
+
+        //2. Data Type
+        let dt = &mut DTYPE_LS.to_vec();
+        response.append(dt);
+        response.push(LINE_FEED);
+
+        //3. Empty line
+        response.push(LINE_FEED);
+
+        //4. Body
+        for mut item in values {
+            // Make sure the length bytes fixed 4
+            let len = item.len() as u32;
+            let mut len_v = len.to_be_bytes().to_vec();
+            response.append(&mut len_v);
+            response.append(&mut item);
+        }
 
         return response;
     }

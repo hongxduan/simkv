@@ -3,7 +3,10 @@
 //! date: 6 Apr, 2025
 //!
 
-use crate::kvtp::kvtp::KvtpMessage;
+use crate::{
+    cmd::base::INV_CMD,
+    kvtp::{kvtp::KvtpMessage, response::KvtpResponse},
+};
 
 pub struct Unknown {
     akvp: KvtpMessage,
@@ -16,6 +19,6 @@ impl Unknown {
 
     pub fn execute(&self) -> Vec<u8> {
         println!("{}", self.akvp.command);
-        String::from("Invalid command").as_bytes().to_vec()
+        KvtpResponse::build_err(INV_CMD.to_vec())
     }
 }

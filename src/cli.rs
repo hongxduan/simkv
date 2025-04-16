@@ -56,7 +56,7 @@ fn main() {
                 continue;
             }
         }
-        if input.len() == 0 {
+        if input.trim().len() == 0 {
             continue;
         }
         let input_data = parse_input(input.trim());
@@ -71,8 +71,8 @@ fn main() {
                         // TODO: loop
                         let len_result = stream.read(&mut buf);
                         match len_result {
-                            Ok(_) => {
-                                parse_kvtp_response(buf.to_vec());
+                            Ok(len) => {
+                                parse_kvtp_response(buf[0..len].to_vec());
                                 //println!("{},{:?}", len, String::from_utf8(buf[0..len].to_vec()));
                                 //println!("{}", String::from_utf8(buf[0..len].to_vec()).unwrap());
                             }
