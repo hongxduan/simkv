@@ -53,7 +53,7 @@ pub fn parse_input(input: &str) -> Result<InputData, String> {
 
     for (i, c) in input.chars().enumerate() {
         // meet space
-        if c == SPACE_CHAR || i == input.len() - 1 {
+        if c == SPACE_CHAR || i == input.chars().count() - 1 {
             // the last char
             if c == DQUTE_CHAR {
                 if pc != BQUOTE_CHAR {
@@ -61,9 +61,9 @@ pub fn parse_input(input: &str) -> Result<InputData, String> {
                 }
             }
 
-            // if not quoted, then push piece pieces
+            // if not quoted, then push piece to pieces
             if !quoted {
-                if i == input.len() - 1 {
+                if i == input.chars().count() - 1 {
                     pieces.push(input[si..].trim().to_string());
                 } else {
                     pieces.push(input[si..i].trim().to_string());
@@ -79,8 +79,6 @@ pub fn parse_input(input: &str) -> Result<InputData, String> {
         }
         pc = c;
     }
-
-    //println!("{:?}", pieces);
 
     let mut i = 0;
     while i < pieces.len() {
@@ -141,7 +139,7 @@ pub fn parse_input(input: &str) -> Result<InputData, String> {
             ttl,
             value,
         };
-        //println!("{:?}", input_data);
+        println!("{:?}", input_data);
         return Ok(input_data);
     }
     Err(error_msg)
