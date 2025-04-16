@@ -42,8 +42,23 @@ fn main() {
         print_leading(&args.host, args.port);
         std::io::stdout().flush().unwrap();
         input.clear();
-        stdin.read_line(input).unwrap();
-
+        let read_result = stdin.read_line(input);
+        match read_result {
+            Ok(size) => {
+                if size == 0 {
+                    continue;
+                }
+            }
+            Err(_) => {
+                // This could happen if user input UTF8 char as command
+                // Just ask user to retry
+                println!("Input error, try again");
+                continue;
+            }
+        }
+        if input.len() == 0 {
+            continue;
+        }
         let input_data = parse_input(input.trim());
         match input_data {
             Ok(data) => {

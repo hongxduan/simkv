@@ -139,7 +139,7 @@ pub fn parse_input(input: &str) -> Result<InputData, String> {
             ttl,
             value,
         };
-        println!("{:?}", input_data);
+        //println!("{:?}", input_data);
         return Ok(input_data);
     }
     Err(error_msg)

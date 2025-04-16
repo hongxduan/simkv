@@ -116,10 +116,6 @@ const DTYPE_M: &str = "M";
 /// Parse response from server
 ///
 pub fn parse_kvtp_response(response: Vec<u8>) {
-    let result: String = String::new();
-
-    let mut err_msg = String::new();
-
     // psudo code
     let mut prot_status = String::new();
     let mut dtype = String::new();
@@ -157,10 +153,6 @@ pub fn parse_kvtp_response(response: Vec<u8>) {
         }
     }
 
-    // Body
-    let body = response[header_len..].to_vec();
-    //println!("{:#?}", body);
-
     // Get Status
     let mut status = "";
     let pieces = prot_status.split(" ");
@@ -173,21 +165,25 @@ pub fn parse_kvtp_response(response: Vec<u8>) {
             //println!("{}:", status);
         } else {
             // this should never happen
-            println!("unknown error");
+            println!("Unknown error");
             return;
         }
     }
+
+    // Body
+    let body = response[header_len..].to_vec();
+    //println!("{:#?}", body);
 
     // Match Data Types
     match dtype.as_str() {
         DTYPE_I => {
             print_status(status, true);
-            if body.len() == 4 {
+            if body.len() >= 4 {
                 let arr: [u8; 4] = [body[0], body[1], body[2], body[3]];
                 let i = i32::from_be_bytes(arr);
                 println!("{}", i);
             } else {
-                println!("unknown error");
+                println!("Unknown error");
             }
         }
         DTYPE_L => {}
