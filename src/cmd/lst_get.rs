@@ -21,8 +21,6 @@ pub struct LstGet;
 impl LstGet {
     pub fn get(_: KvtpMessage, ki: KeyInfo, db: &Db) -> Vec<u8> {
         let entry_opt = db.get(ki.key);
-        // TODO: the skey can be not number
-        //let idx_result = ki.skey.parse::<isize>();
         let lst_skey_result = LstGetSubKey::parse(&ki.skey);
         match lst_skey_result {
             Ok(lsk) => {
@@ -68,9 +66,30 @@ impl LstGet {
     }
 }
 
-fn get_by_index(l: &mut LinkedList<Vec<u8>>, idx: i32) -> Vec<u8> {
+///
+/// Get value by index
+/// If the index *not* int range of list, then return INV_IDX error
+///
+fn get_by_index(l: &mut LinkedList<Vec<u8>>, mut idx: i32) -> Vec<u8> {
     //println!("get_lst- {}, {}", idx, l.len());
-    if idx == -1 {
+
+    // Normalize idx
+    let len = l.len() as i32;
+    let udx: usize;
+    if idx < 0 {
+        idx += len;
+        // If idx still < 0 after add len
+        if idx < 0 {
+            return return_invalid_index();
+        }
+        udx = idx as usize;
+    } else if idx >= len {
+        return return_invalid_index();
+    } else {
+        udx = idx as usize;
+    }
+
+    /*if idx == -1 {
         let entry_opt = l.pop_back();
         match entry_opt {
             Some(v) => {
@@ -80,7 +99,8 @@ fn get_by_index(l: &mut LinkedList<Vec<u8>>, idx: i32) -> Vec<u8> {
                 return KvtpResponse::build_err(INV_IDX.to_vec());
             }
         }
-    } else if idx == 0 {
+    } else */
+    if udx == 0 {
         let entry_opt = l.pop_front();
         match entry_opt {
             Some(v) => {
@@ -90,14 +110,13 @@ fn get_by_index(l: &mut LinkedList<Vec<u8>>, idx: i32) -> Vec<u8> {
                 return KvtpResponse::build_err(INV_IDX.to_vec());
             }
         }
-    } else if idx > 0 {
-        let udx = idx as usize;
-        if udx > l.len() {
+    } else if udx > 0 {
+        if udx >= l.len() {
             return KvtpResponse::build_err(INV_IDX.to_vec());
         } else {
             let mut tail = l.split_off(udx);
             let result_opt = tail.pop_front();
-            l.append(&mut tail);
+            //l.append(&mut tail);
             match result_opt {
                 Some(v) => {
                     return KvtpResponse::build_string(v);
@@ -112,27 +131,64 @@ fn get_by_index(l: &mut LinkedList<Vec<u8>>, idx: i32) -> Vec<u8> {
     }
 }
 
-fn get_range(l: &mut LinkedList<Vec<u8>>, start: i32, end: i32) -> Vec<u8> {
+///
+/// Get range(slice) of list
+///
+/// Different from get by index, if start or end *not* in the index range of list,
+/// it will *not* return INV_IDX
+/// Instead, if start on left side of 0, start will be 0, if end at right side of
+/// length of list, then end will be length of list
+///
+fn get_range(l: &mut LinkedList<Vec<u8>>, mut start: i32, mut end: i32) -> Vec<u8> {
     let mut values: Vec<Vec<u8>> = Vec::new();
 
-    let mut start_u: usize = 0;
-    let mut end_u: usize = 0;
+    let len = l.len();
+    let mut start_u: usize;
+    let mut end_u: usize;
 
-    // TODO: convert start, end
-    start_u = start as usize;
+    // Normalize start
+    if start < 0 {
+        start = start + len as i32;
+        if start < 0 {
+            start_u = 0;
+        } else {
+            start_u = start as usize;
+        }
+    } else {
+        start_u = start as usize;
+    }
+    // if start on the right side of index range, return empty
+    if start_u >= len {
+        return KvtpResponse::build_list_string(values);
+    }
+
+    // Normalize end
+    if end < 0 {
+        end = end + len as i32;
+        // if end equals 0 or on left side of 0, return empty
+        if end <= 0 {
+            return KvtpResponse::build_list_string(values);
+        }
+    }
     end_u = end as usize;
+    if end_u > len {
+        end_u = len;
+    }
 
     println!("{},{}", start_u, end_u);
 
     let mut middle = l.split_off(start_u);
-    // Because len of middle f.len() - start_u, so the split must orginal end_u minus start_u
+    // Because len of middle is f.len() - start_u, so the split must at orginal end_u minus start_u
     let mut tail = middle.split_off(end_u - start_u);
 
     for (_, value) in middle.iter().enumerate() {
         values.push(value.to_vec());
     }
-    println!("{:?}", values);
     return KvtpResponse::build_list_string(values);
+}
+
+fn return_invalid_index() -> Vec<u8> {
+    KvtpResponse::build_err(INV_IDX.to_vec())
 }
 
 /*---------------------------------------------------------------------------*/
