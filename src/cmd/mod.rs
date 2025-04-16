@@ -17,12 +17,14 @@ pub mod set;
 
 pub mod ttl;
 
+pub mod unknown;
+
 /* get and set */
 pub mod lst_get;
 pub mod lst_set;
+pub mod map_get;
 pub mod map_set;
+pub mod set_get;
 pub mod set_set;
 pub mod str_get;
 pub mod str_set;
-
-pub mod unknown;

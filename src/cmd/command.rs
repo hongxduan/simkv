@@ -26,7 +26,6 @@ impl Command {
     ///
     /// Execute command
     ///
-    ///
     pub fn execute(self, db: &Db) -> Vec<u8> {
         // Execute specific command
         let result = match self {

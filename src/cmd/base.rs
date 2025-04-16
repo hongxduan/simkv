@@ -24,7 +24,7 @@ pub const INV_SUB_KEY_FMT: &[u8] = "INV_SUB_KEY_FMT".as_bytes();
 // users[$1]
 // users[&tom]
 const LST_KEY_PATTERN: &str =
-    r"(?<key>.+)\[(?<skey>(-?[0-9]+|-?[0-9]+\.\.-?[0-9]+|#|\$-?[0-9]+|\&[\[\]]+)+)\]$";
+    r"(?<key>.+)\[(?<skey>(-?[0-9]+|-?[0-9]+\.\.-?[0-9]+|#|\$-?[0-9]+|\&.+)+)\]$";
 //
 const MAP_KEY_PATTERN: &str = r"(?<key>.+)\{(?<skey>[^\{\}]+)\}$";
 //

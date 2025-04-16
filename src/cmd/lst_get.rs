@@ -72,7 +72,12 @@ impl LstGet {
                             }
                             // Find value index in the list
                             LstGetSubKey::Ampersand(value) => {
-                                return KvtpResponse::build_err(INV_IDX.to_vec());
+                                let pos_result = l.iter().position(|e| *e == value);
+                                match pos_result {
+                                    Some(idx) => return KvtpResponse::build_integer(idx as i32),
+                                    // Return -1 if element not found
+                                    None => return KvtpResponse::build_integer(-1),
+                                }
                             }
                             // Get list length
                             LstGetSubKey::Hash(()) => {
@@ -101,14 +106,14 @@ impl LstGet {
 }
 
 pub enum LstGetSubKey {
-    Number(i32),       // [5]       purely number
-    Range((i32, i32)), // [1..5]    Range
-    Ampersand(String), // [&tom]    Get index , Index(Address) of tom
-    Hash(()),          // [#]       Get length
+    Number(i32),        // [5]       purely number
+    Range((i32, i32)),  // [1..5]    Range
+    Ampersand(Vec<u8>), // [&tom]    Get index , Index(Address) of tom
+    Hash(()),           // [#]       Get length
 }
 
 const PATTERN_RANGE: &str = r"(?<start>-?[0-9]+)\.\.(?<end>-?[0-9]+)";
-const PATTERN_AMPERSAND: &str = r"^&(?<value>[\[]]]+)";
+const PATTERN_AMPERSAND: &str = r"^&(?<value>.+)";
 //const PATTERN_HASH: &str = r"#";
 
 ///
@@ -136,7 +141,7 @@ impl LstGetSubKey {
             }
         } else if re_ampersand.is_match(skey) {
             match re_ampersand.captures(skey) {
-                Some(caps) => Ok(LstGetSubKey::Ampersand(caps["value"].to_string())),
+                Some(caps) => Ok(LstGetSubKey::Ampersand(caps["value"].as_bytes().to_vec())),
                 _ => Err(KeyError),
             }
         } else if skey == "#" {

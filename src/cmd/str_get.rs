@@ -25,7 +25,7 @@ impl StrGet {
                     return KvtpResponse::build_string(INV_TYP.to_vec());
                 }
             },
-            None => KvtpResponse::build_string(KEY_NOT_EX.to_vec()),
+            None => KvtpResponse::build_err(KEY_NOT_EX.to_vec()),
         }
     }
 }

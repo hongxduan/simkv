@@ -5,57 +5,20 @@
 //!
 //! Get value by Key
 use crate::{
-    kvtp::kvtp::KvtpMessage,
     db::{db::Db, entry::EntryType},
+    kvtp::kvtp::KvtpMessage,
 };
 
 use super::{
     base::{BaseCommand, KeyInfo},
     lst_get::LstGet,
+    map_get::MapGet,
+    set_get::SetGet,
     str_get::StrGet,
 };
 
 pub struct Get {
     kvtp: KvtpMessage,
-}
-
-impl Get {
-    ///
-    ///
-    ///
-    ///
-    ///
-    ///
-    fn get_map(self, ki: KeyInfo, db: &Db) -> Vec<u8> {
-        /*let entry = db.get(ki.key);
-        match entry {
-            Some(val) => {
-                let hm = val.map.unwrap();
-                hm.get(ki.skey.as_str()).unwrap().clone()
-            }
-            None => "nil".as_bytes().to_vec(),
-        }*/
-        "nil".as_bytes().to_vec()
-    }
-
-    ///
-    ///
-    ///
-    ///
-    ///
-    ///
-    ///
-    fn get_set(self, ki: KeyInfo, db: &Db) -> Vec<u8> {
-        /*let entry = db.get(ki.key);
-        match entry {
-            Some(val) => {
-                let hm = val.map.unwrap();
-                hm.get(self.kvtp.key.as_str()).unwrap().clone()
-            }
-            None => "nil".as_bytes().to_vec(),
-        }*/
-        "nil".as_bytes().to_vec()
-    }
 }
 
 ///
@@ -77,8 +40,8 @@ impl BaseCommand for Get {
             Ok(ki) => match ki.entry_type {
                 EntryType::STR => StrGet::get(self.kvtp, ki, db),
                 EntryType::LST => LstGet::get(self.kvtp, ki, db),
-                EntryType::MAP => self.get_map(ki, db),
-                EntryType::SET => self.get_set(ki, db),
+                EntryType::MAP => MapGet::get(self.kvtp, ki, db),
+                EntryType::SET => SetGet::get(self.kvtp, ki, db),
             },
             Err(e) => {
                 return e.to_string().as_bytes().to_vec();
