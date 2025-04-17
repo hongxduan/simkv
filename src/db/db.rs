@@ -217,6 +217,15 @@ impl Shared {
     }
 }
 
+impl State {
+    fn next_expiration(&self) -> Option<Instant> {
+        self.expirations
+            .iter()
+            .next()
+            .map(|expiration| expiration.0)
+    }
+}
+
 async fn purge_expired_tasks(shared: Arc<Shared>) {
     while !shared.is_shutdown() {
         println!("purge...");

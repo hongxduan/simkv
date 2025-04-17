@@ -46,7 +46,7 @@ Body                ...... Body
 - S: String
 - LI: List of Integer
 - LL: LIST of Long
-- LD: LIST OF Double
+- LD: LIST of Double
 - LS: List of String
 - M: Map
 

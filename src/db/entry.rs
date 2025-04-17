@@ -3,7 +3,10 @@
 //! author: Duan HongXing
 //! date: 6 Apr, 2025
 //!
-use std::collections::{BTreeSet, HashMap, LinkedList};
+use std::{
+    collections::{BTreeSet, HashMap, LinkedList},
+    time::Duration,
+};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum EntryType {
@@ -20,6 +23,7 @@ pub struct Entry {
     //pub byt: Option<Vec<u8>>,                  // String
     //pub map: Option<HashMap<String, Vec<u8>>>, // Map
     //pub lst: Option<Vec<Vec<u8>>>,             // List
+    pub ttl: Option<Duration>,
 }
 
 #[derive(Debug, Clone)]

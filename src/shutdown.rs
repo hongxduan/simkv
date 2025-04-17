@@ -1,10 +1,10 @@
-///! Shutdown implement
-///!
-///! author: Duan HongXing
-///! date: 10 Apr, 2025
+//! Shutdown implement
+//!
+//! author: Duan HongXing
+//! date: 10 Apr, 2025
+//! 
 
 use tokio::sync::broadcast;
-
 
 #[derive(Debug)]
 pub struct Shutdown {

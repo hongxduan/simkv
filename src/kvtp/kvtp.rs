@@ -1,11 +1,9 @@
-use std::i32;
-
-///! Advance Key-Value Protocol implement
-///!
-///! author: Duan HongXing
-///! date: 5 Apr, 2025
-///!
-
+//! Advance Key-Value Protocol implement
+//!
+//! author: Duan HongXing
+//! date: 5 Apr, 2025
+//!
+use std::{i32, time::Duration};
 const CMD_LINE_HEAD: &str = "CMD";
 const KEY_LINE_HEAD: &str = "KEY";
 const ARGS_LINE_HEAD: &str = "ARGS";
@@ -18,7 +16,7 @@ pub struct KvtpMessage {
     pub command: String,
     pub key: String,
     pub args: String,
-    pub ttl: i32,
+    pub ttl: u64,
 
     pub body: Vec<u8>,
 }
@@ -40,7 +38,7 @@ impl KvtpMessage {
         let mut command = String::new();
         let mut key = String::new();
         let mut args = String::new();
-        let mut ttl: i32 = 0;
+        let mut ttl: u64 = 0;
 
         //Split message by line feed
         let lines = message.split(|&b| b == LINE_FEED);
@@ -103,7 +101,7 @@ impl KvtpMessage {
                                         break;
                                     }
                                 }
-                                let tmp = s_ttl.parse::<i32>();
+                                let tmp = s_ttl.parse::<u64>();
                                 match tmp {
                                     Ok(i) => ttl = i,
                                     Err(_) => {
@@ -137,8 +135,15 @@ impl KvtpMessage {
             body,
         };
 
-        //println!("{:?}", akvp_msg);
+        println!("{:?}", akvp_msg);
 
         Ok(akvp_msg)
+    }
+
+    pub fn ttl_to_duration(&self) -> Option<Duration> {
+        if self.ttl > 0 {
+            return Some(Duration::from_secs(self.ttl));
+        }
+        None
     }
 }

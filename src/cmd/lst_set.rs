@@ -87,10 +87,12 @@ impl LstSet {
                     // New List
                     None => {
                         let mut l: LinkedList<Vec<u8>> = LinkedList::new();
+                        let ttl = kvtp.ttl_to_duration();
                         l.push_front(kvtp.body);
                         let entry = Entry {
                             etype: EntryType::LST,
                             data: EntryData::Lst(l),
+                            ttl,
                         };
 
                         db.set(ki.key, entry);

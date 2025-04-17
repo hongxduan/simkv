@@ -2,7 +2,7 @@
 //!
 //! author: Duan HongXing
 //! date: 4 Apr, 2025
-//! 
+//!
 
 use tokio::net::TcpListener;
 use tokio::signal;
@@ -11,8 +11,8 @@ use std::env;
 
 mod db;
 
-mod kvtp;
 mod cmd;
+mod kvtp;
 
 mod runner;
 
