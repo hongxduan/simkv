@@ -96,55 +96,67 @@ impl Db {
     }
 
     pub fn set(&self, key: String, entry: Entry) {
-        //let bucket_id = Bucket::calc_bucket_id(&key);
-        //let slot = self.calc_slot(&key);
-        //let mut state = self.page0.state.lock().unwrap();
-        //state.buckets[bucket_id].slots[slot].insert(key, entry);
-
-        let (page, bucket, slot) = self.locate_pbs(&key);
         let mut state = self.shared.state.lock().unwrap();
-        state.pages[page].buckets[bucket].slots[slot].insert(key.as_bytes().to_vec(), entry);
-        //state.buckets[bucket].slots[slot].insert(key, entry);
+        let (page, bucket, slot) = self.shared.locate_pbs(&key);
+
+        let mut notify = false;
+
+        /*let expires_at = entry.ttl.map(|duration| {
+            let when = Instant::now() + duration;
+
+            notify = state
+                .next_expiration()
+                .map(|expiration| expiration > when)
+                .unwrap_or(true);
+
+            when
+        });*/
+
+        let expire_at = entry.expire_at;
+
+        if let Some(when) = entry.expire_at.clone() {
+            notify = state
+                .next_expiration()
+                .map(|expiration| expiration > when)
+                .unwrap_or(true);
+        }
+
+        let prev =
+            state.pages[page].buckets[bucket].slots[slot].insert(key.as_bytes().to_vec(), entry);
+
+        if let Some(prev) = prev {
+            if let Some(when) = prev.expire_at {
+                state.expirations.remove(&(when, key.clone()));
+            }
+        }
+
+        if let Some(when) = expire_at {
+            state.expirations.insert((when, key.clone()));
+        }
 
         drop(state);
+
+        if notify {
+            self.shared.background_task.notify_one();
+        }
     }
 
     pub fn get(&self, key: String) -> Option<Entry> {
         //let bucket_id = Bucket::calc_bucket_id(&key);
         //let slot = self.calc_slot(&key);
 
-        let (page, bucket, slot) = self.locate_pbs(&key);
         let state = self.shared.state.lock().unwrap();
+        let (page, bucket, slot) = self.shared.locate_pbs(&key);
         let entry = state.pages[page].buckets[bucket].slots[slot].get(key.as_bytes());
 
         entry.cloned()
     }
 
     pub fn del(&self, key: String) -> Option<Entry> {
-        let (page, bucket, slot) = self.locate_pbs(&key);
         let mut state = self.shared.state.lock().unwrap();
+        let (page, bucket, slot) = self.shared.locate_pbs(&key);
         let entry = state.pages[page].buckets[bucket].slots[slot].remove(&key.as_bytes().to_vec());
         entry
-    }
-
-    ///
-    /// Calculate page, bucket, slot
-    ///
-    /// +--Page--+--Bucket index--+--Bucket id--+
-    /// | page0: |    0-63        |   0-63      |
-    /// | page1: |    0-63        |   64-127    |
-    /// | page2: |    0-63        |   128-191   |
-    /// | ...    |    ...         |   ...       |
-    /// +--------+----------------+-------------+
-    ///
-    fn locate_pbs(&self, key: &str) -> (usize, usize, usize) {
-        let crc16: crc::Crc<u16> = crc::Crc::<u16>::new(&crc::CRC_16_XMODEM);
-        let bucket_id = (crc16.checksum(key.as_bytes()) % (BUCKET_NUM as u16)) as usize;
-        let page = bucket_id / BUCKETS_PER_PAGE; // 155 / 64 = 2.42 = 2 => page2
-        let bucket = bucket_id % BUCKETS_PER_PAGE; // 155 % 64 = 27 => page2.buckets[27]
-        let slot = bucket_id % SLOTS_PER_BUCKET; // 155 % 64 = 27 => page2.buckets[27].slot[27]
-
-        (page, bucket, slot)
     }
 
     fn shutdown_purge_task(&self) {
@@ -205,11 +217,32 @@ impl Shared {
             }
 
             // The key expired, remove it
-            state.pages[1].buckets[1].slots[1].remove(key.as_bytes()); // TODO: remove hardcode index
+            let (page, bucket, slot) = self.locate_pbs(&key);
+            state.pages[page].buckets[bucket].slots[slot].remove(key.as_bytes()); // TODO: remove hardcode index
             state.expirations.remove(&(when, key.clone()));
         }
 
         None
+    }
+
+    ///
+    /// Calculate page, bucket, slot
+    ///
+    /// +--Page--+--Bucket index--+--Bucket id--+
+    /// | page0: |    0-63        |   0-63      |
+    /// | page1: |    0-63        |   64-127    |
+    /// | page2: |    0-63        |   128-191   |
+    /// | ...    |    ...         |   ...       |
+    /// +--------+----------------+-------------+
+    ///
+    fn locate_pbs(&self, key: &str) -> (usize, usize, usize) {
+        let crc16: crc::Crc<u16> = crc::Crc::<u16>::new(&crc::CRC_16_XMODEM);
+        let bucket_id = (crc16.checksum(key.as_bytes()) % (BUCKET_NUM as u16)) as usize;
+        let page = bucket_id / BUCKETS_PER_PAGE; // 155 / 64 = 2.42 = 2 => page2
+        let bucket = bucket_id % BUCKETS_PER_PAGE; // 155 % 64 = 27 => page2.buckets[27]
+        let slot = bucket_id % SLOTS_PER_BUCKET; // 155 % 64 = 27 => page2.buckets[27].slot[27]
+
+        (page, bucket, slot)
     }
 
     fn is_shutdown(&self) -> bool {

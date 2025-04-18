@@ -16,11 +16,12 @@ pub struct StrSet;
 
 impl StrSet {
     pub fn set(kvtp: KvtpMessage, ki: KeyInfo, db: &Db) -> Vec<u8> {
-        let ttl = kvtp.ttl_to_duration();
+        //let ttl = kvtp.ttl_to_duration();
+        let expire_at = kvtp.ttl_to_instant();
         let entry = Entry {
             etype: EntryType::STR,
             data: EntryData::Byt(kvtp.body),
-            ttl,
+            expire_at,
         };
         db.set(ki.key, entry);
         KvtpResponse::build_string(OK.to_vec())

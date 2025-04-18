@@ -3,10 +3,9 @@
 //! author: Duan HongXing
 //! date: 6 Apr, 2025
 //!
-use std::{
-    collections::{BTreeSet, HashMap, LinkedList},
-    time::Duration,
-};
+use std::collections::LinkedList;
+
+use tokio::time::Instant;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum EntryType {
@@ -23,7 +22,8 @@ pub struct Entry {
     //pub byt: Option<Vec<u8>>,                  // String
     //pub map: Option<HashMap<String, Vec<u8>>>, // Map
     //pub lst: Option<Vec<Vec<u8>>>,             // List
-    pub ttl: Option<Duration>,
+    //pub ttl: Option<Duration>,
+    pub expire_at: Option<Instant>,
 }
 
 #[derive(Debug, Clone)]

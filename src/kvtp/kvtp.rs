@@ -3,7 +3,10 @@
 //! author: Duan HongXing
 //! date: 5 Apr, 2025
 //!
-use std::{i32, time::Duration};
+
+use std::time::Duration;
+
+use tokio::time::Instant;
 const CMD_LINE_HEAD: &str = "CMD";
 const KEY_LINE_HEAD: &str = "KEY";
 const ARGS_LINE_HEAD: &str = "ARGS";
@@ -143,6 +146,13 @@ impl KvtpMessage {
     pub fn ttl_to_duration(&self) -> Option<Duration> {
         if self.ttl > 0 {
             return Some(Duration::from_secs(self.ttl));
+        }
+        None
+    }
+
+    pub fn ttl_to_instant(&self) -> Option<Instant> {
+        if self.ttl > 0 {
+            return Some(Instant::now() + Duration::from_secs(self.ttl));
         }
         None
     }
