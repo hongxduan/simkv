@@ -45,7 +45,11 @@ impl LstSet {
                                         let llen = l.len() as i32;
                                         // Normalize idx
                                         if idx < 0 {
-                                            idx += llen;
+                                            // Reason need to +1 is because split_off() is inclusive
+                                            // For instance, idx = -2, if not +1 then the last 2 elements
+                                            // will be split, and the new element inserted into the *3rd*
+                                            // element from back, but *2nd* is correct for -2
+                                            idx += llen + 1;
                                             // If idx still < 0 after add length of list
                                             if idx < 0 {
                                                 return KvtpResponse::build_err(INV_IDX.to_vec());
