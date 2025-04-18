@@ -33,25 +33,34 @@ impl LstSet {
                                 // If purely Numbers in the bracket
                                 // Push front or Push back base on the Number
                                 // Or insert in the middle
-                                LstSetSubKey::Number(idx) => {
+                                LstSetSubKey::Number(mut idx) => {
+                                    // 0 or -1, Push front or Push back
                                     if idx == -1 {
                                         l.push_back(kvtp.body);
                                     } else if idx == 0 {
                                         l.push_front(kvtp.body);
-                                    } else if idx >= 0 {
-                                        let udx = idx as usize;
-                                        if udx >= l.len() {
-                                            l.push_back(kvtp.body);
-                                        } else {
-                                            // Insert in the middle
-                                            let mut tail = l.split_off(udx);
-                                            l.push_back(kvtp.body);
-                                            l.append(&mut tail);
-                                        }
-                                    } else {
-                                        return KvtpResponse::build_string(INV_IDX.to_vec());
                                     }
+                                    // Other index than 0 or -1
+                                    else {
+                                        let llen = l.len() as i32;
+                                        // Normalize idx
+                                        if idx < 0 {
+                                            idx += llen;
+                                            // If idx still < 0 after add length of list
+                                            if idx < 0 {
+                                                return KvtpResponse::build_err(INV_IDX.to_vec());
+                                            }
+                                        } else if idx > llen {
+                                            // If idx > list list
+                                            return KvtpResponse::build_err(INV_IDX.to_vec());
+                                        }
 
+                                        let udx = idx as usize;
+                                        // Insert in the middle
+                                        let mut tail = l.split_off(udx);
+                                        l.push_back(kvtp.body);
+                                        l.append(&mut tail);
+                                    }
                                     // Need set back, or else the set not works
                                     entry.data = EntryData::Lst(l);
                                     db.set(ki.key, entry);
