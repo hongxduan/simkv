@@ -9,7 +9,7 @@ use crate::{
     kvtp::{kvtp::KvtpMessage, response::KvtpResponse},
 };
 
-use super::base::{INV_TYP, KEY_NOT_EX, KeyInfo};
+use super::{INV_TYP, KEY_NOT_EX, base_db::KeyInfo};
 
 pub struct StrGet;
 

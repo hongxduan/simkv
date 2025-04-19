@@ -3,9 +3,9 @@
 //! author: Duan HongXing
 //! date: 4 Apr, 2025
 //!
-use crate::{kvtp::kvtp::KvtpMessage, cmd::base::INV_KEY_FMT, db::db::Db};
+use crate::{kvtp::kvtp::KvtpMessage, cmd::INV_KEY_FMT, db::db::Db};
 
-use super::base::{BaseCommand, KEY_NOT_EX, OK};
+use super::{base_db::DbCommand, KEY_NOT_EX, OK};
 
 pub struct Del {
     kvtp: KvtpMessage,
@@ -13,7 +13,7 @@ pub struct Del {
 
 impl Del {}
 
-impl BaseCommand for Del {
+impl DbCommand for Del {
     fn new(kvtp: KvtpMessage) -> Self {
         Del { kvtp }
     }

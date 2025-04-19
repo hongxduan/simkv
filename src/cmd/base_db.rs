@@ -11,14 +11,6 @@ use crate::{
 };
 use regex::Regex;
 
-pub const OK: &[u8] = "Ok".as_bytes();
-pub const INV_CMD: &[u8] = "INV_CMD".as_bytes();
-pub const INV_KEY_FMT: &[u8] = "INV_KEY_FMT".as_bytes();
-pub const INV_IDX: &[u8] = "INV_IDX".as_bytes(); // for list
-pub const INV_TYP: &[u8] = "INV_TYP".as_bytes();
-pub const INV_SUB_KEY_FMT: &[u8] = "INV_SUB_KEY_FMT".as_bytes();
-pub const KEY_NOT_EX: &[u8] = "KEY_NOT_EX".as_bytes();
-
 pub const MINUS_1: i32 = -1;
 pub const MINUS_2: i32 = -2;
 
@@ -57,7 +49,7 @@ impl fmt::Debug for KeyError {
     }
 }
 
-pub trait BaseCommand {
+pub trait DbCommand {
     fn new(kvtp: KvtpMessage) -> Self;
     fn execute(self, db: &Db) -> Vec<u8>;
 

@@ -4,7 +4,7 @@
 //!
 
 use crate::{
-    cmd::base::INV_CMD,
+    cmd::INV_CMD,
     kvtp::{kvtp::KvtpMessage, response::KvtpResponse},
 };
 

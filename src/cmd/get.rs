@@ -7,17 +7,16 @@
 use tokio::time::Instant;
 
 use crate::{
-    db::{db::Db, entry::EntryType},
-    kvtp::{self, kvtp::KvtpMessage, response::KvtpResponse},
+    cmd::INV_KEY_FMT, db::{db::Db, entry::EntryType}, kvtp::{kvtp::KvtpMessage, response::KvtpResponse}
 };
 
 use super::{
-    base::{BaseCommand, INV_KEY_FMT, KEY_NOT_EX, KeyInfo, MINUS_1, MINUS_2},
+    base_db::{DbCommand, KeyInfo, MINUS_1, MINUS_2},
     key,
     lst_get::LstGet,
     map_get::MapGet,
     set_get::SetGet,
-    str_get::StrGet,
+    str_get::StrGet, KEY_NOT_EX,
 };
 
 pub struct Get {
@@ -52,7 +51,7 @@ impl Get {
 ///
 ///
 ///
-impl BaseCommand for Get {
+impl DbCommand for Get {
     fn new(kvtp: KvtpMessage) -> Self {
         Get { kvtp }
     }

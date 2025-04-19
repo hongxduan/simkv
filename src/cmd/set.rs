@@ -5,13 +5,11 @@
 //!
 
 use crate::{
-    cmd::base::INV_KEY_FMT,
-    db::{db::Db, entry::EntryType},
-    kvtp::{kvtp::KvtpMessage, response::KvtpResponse},
+    cmd::INV_KEY_FMT, db::{db::Db, entry::EntryType}, kvtp::{kvtp::KvtpMessage, response::KvtpResponse}
 };
 
 use super::{
-    base::BaseCommand, lst_set::LstSet, map_set::MapSet, set_set::SetSet, str_set::StrSet,
+    base_db::DbCommand, lst_set::LstSet, map_set::MapSet, set_set::SetSet, str_set::StrSet,
 };
 
 #[derive(Debug)]
@@ -19,7 +17,7 @@ pub struct Set {
     kvtp: KvtpMessage,
 }
 
-impl BaseCommand for Set {
+impl DbCommand for Set {
     fn new(kvtp: KvtpMessage) -> Self {
         Set { kvtp }
     }

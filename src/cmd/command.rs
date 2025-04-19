@@ -3,7 +3,9 @@
 //! author: Duan HongXing
 //! date: 6 Apr, 2025
 //!
-use super::base::BaseCommand;
+use super::base_db::DbCommand;
+use super::base_op::OpCommand;
+use super::cinit::CInit;
 use super::del::Del;
 use super::get::Get;
 use super::key::Key;
@@ -18,7 +20,7 @@ pub enum Command {
     Del(Del),
     Key(Key),
     Set(Set),
-    Ttl(Ttl),
+    CInit(CInit),
     Unknown(Unknown),
 }
 
@@ -33,7 +35,7 @@ impl Command {
             Command::Del(del) => del.execute(db),
             Command::Key(key) => key.execute(),
             Command::Set(set) => set.execute(db),
-            Command::Ttl(ttl) => ttl.execute(db),
+            Command::CInit(ttl) => ttl.execute(),
             Command::Unknown(unknown) => unknown.execute(),
         };
 
@@ -46,7 +48,7 @@ impl Command {
     /// Unlike execute(db) has parameter Db, this method will not operate
     /// on key value data
     ///
-    pub fn execute_wo_key() -> Vec<u8> {
+    pub fn execute_op() -> Vec<u8> {
         Vec::new()
     }
 
@@ -60,12 +62,12 @@ impl Command {
         let ref str_cmd = kvtp.command;
 
         // Get specific Command
-        let command = match str_cmd.to_lowercase().as_str() {
-            "get" => Command::Get(Get::new(kvtp)),
-            "del" => Command::Del(Del::new(kvtp)),
-            "key" => Command::Key(Key::new(kvtp)),
-            "set" => Command::Set(Set::new(kvtp)),
-            "ttl" => Command::Ttl(Ttl::new(kvtp)),
+        let command = match str_cmd.to_uppercase().as_str() {
+            "GET" => Command::Get(Get::new(kvtp)),
+            "DEL" => Command::Del(Del::new(kvtp)),
+            "KEY" => Command::Key(Key::new(kvtp)),
+            "SET" => Command::Set(Set::new(kvtp)),
+            "CINIT" => Command::CInit(CInit::new(kvtp)),
             _ => Command::Unknown(Unknown::new(kvtp)),
         };
 

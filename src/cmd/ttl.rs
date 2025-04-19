@@ -17,13 +17,13 @@
 //!
 use crate::{kvtp::kvtp::KvtpMessage, db::db::Db};
 
-use super::base::BaseCommand;
+use super::base_db::DbCommand;
 
 pub struct Ttl {
     kvtp: KvtpMessage,
 }
 
-impl BaseCommand for Ttl {
+impl DbCommand for Ttl {
     fn new(kvtp: KvtpMessage) -> Self {
         Ttl { kvtp }
     }

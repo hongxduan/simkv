@@ -6,7 +6,7 @@
 
 use crate::{kvtp::kvtp::KvtpMessage, db::db::Db};
 
-use super::base::{KeyInfo, OK};
+use super::{base_db::KeyInfo, OK};
 
 pub struct SetSet;
 

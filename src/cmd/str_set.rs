@@ -4,13 +4,13 @@
 //! date: 14 Apr, 2025
 //!
 
-use crate::cmd::base::KeyInfo;
+use crate::cmd::base_db::KeyInfo;
 use crate::db::db::Db;
 use crate::db::entry::{Entry, EntryData, EntryType};
 use crate::kvtp::kvtp::KvtpMessage;
 use crate::kvtp::response::KvtpResponse;
 
-use super::base::OK;
+use super::OK;
 
 pub struct StrSet;
 
