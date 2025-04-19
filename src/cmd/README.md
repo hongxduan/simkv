@@ -83,3 +83,26 @@ get users[#]
 // if the value not in the list, then return Err(NOT_FOUND)
 get users[?jerry]
 ```
+
+# TTL
+## set ttl with value
+```
+SET KEY VALUE -ttl seconds
+```
+
+## update ttl without value
+```
+SET KEY -ttl seconds   // String
+SET KEY[] -ttl seconds // List
+SET KEY{} -ttl seconds // Map
+SET KEY<> -ttl seconds // SET
+```
+
+## get ttl
+```
+// Returns:
+// -2: expired
+// -1: never expire
+// >0: seconds to expire
+GET KEY -ttl
+```

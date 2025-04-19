@@ -5,8 +5,9 @@
 //!
 
 use crate::{
-    kvtp::kvtp::KvtpMessage,
+    cmd::base::INV_KEY_FMT,
     db::{db::Db, entry::EntryType},
+    kvtp::{kvtp::KvtpMessage, response::KvtpResponse},
 };
 
 use super::{
@@ -33,7 +34,10 @@ impl BaseCommand for Set {
                 EntryType::MAP => MapSet::set(self.kvtp, ki, db),
                 EntryType::SET => SetSet::set(self.kvtp, ki, db),
             },
-            Err(e) => e.to_string().as_bytes().to_vec(),
+            Err(e) => {
+                println!("GET::execute{:?}", e);
+                return KvtpResponse::build_err(INV_KEY_FMT.to_vec());
+            }
         }
     }
 }

@@ -91,7 +91,7 @@ fn main() {
                 //println!("{:?}", String::from_utf8(akvp));
             }
             Err(err) => {
-                println!("{}", err);
+                println!("{}{}", '\u{274C}', err);
                 continue;
             }
         }

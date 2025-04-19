@@ -50,10 +50,13 @@ pub fn parse_input(input: &str) -> Result<InputData, String> {
     let mut quoted: bool = false;
     let mut pc: char = '0';
     let mut si = 0; // the start index
+    let mut ei: usize;
+    let mut need_strip_quote = false;
 
     for (i, c) in input.chars().enumerate() {
         // meet space
         if c == SPACE_CHAR || i == input.chars().count() - 1 {
+            ei = i;
             // the last char
             if c == DQUTE_CHAR {
                 if pc != BQUOTE_CHAR {
@@ -61,20 +64,35 @@ pub fn parse_input(input: &str) -> Result<InputData, String> {
                 }
             }
 
+            if i == input.chars().count() - 1 && quoted {
+                return Err("Quote not closed".to_string());
+            }
+
             // if not quoted, then push piece to pieces
             if !quoted {
+                if need_strip_quote {
+                    si += 1;
+                    ei -= 1;
+                }
                 if i == input.chars().count() - 1 {
-                    pieces.push(input[si..].trim().to_string());
+                    pieces.push(input[si..ei + 1].trim().to_string());
                 } else {
-                    pieces.push(input[si..i].trim().to_string());
+                    if ei > si {
+                        pieces.push(input[si..ei].trim().to_string());
+                    }
                 }
 
-                si = i;
+                // i is SPACE, move si to next *non* space char
+                si = i + 1;
+                // reset
+                need_strip_quote = false;
             }
         } else if c == DQUTE_CHAR {
             if pc != BQUOTE_CHAR {
+                if !quoted {
+                    need_strip_quote = true;
+                }
                 quoted = !quoted;
-                println!("{}", quoted);
             }
         }
         pc = c;
@@ -143,7 +161,7 @@ pub fn parse_input(input: &str) -> Result<InputData, String> {
             ttl,
             value,
         };
-        //println!("{:?}", input_data);
+        println!("{:?}", input_data);
         return Ok(input_data);
     }
     Err(error_msg)
