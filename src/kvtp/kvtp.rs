@@ -82,7 +82,7 @@ impl KvtpMessage {
                                 }
                             },
                             KEY_LINE_HEAD => match sec_part {
-                                Some(second) => key = second.trim().to_string(),
+                                Some(second) => key = second.to_string(),
                                 None => {
                                     err_msg = String::from("Invalid key");
                                     break;

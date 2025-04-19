@@ -51,7 +51,6 @@ pub fn parse_input(input: &str) -> Result<InputData, String> {
     let mut pc: char = '0';
     let mut si = 0; // the start index
     let mut ei: usize;
-    let mut need_strip_quote = false;
 
     for (i, c) in input.chars().enumerate() {
         // meet space
@@ -70,28 +69,30 @@ pub fn parse_input(input: &str) -> Result<InputData, String> {
 
             // if not quoted, then push piece to pieces
             if !quoted {
-                if need_strip_quote {
-                    si += 1;
-                    ei -= 1;
-                }
+                let mut piece: &str = "";
+
                 if i == input.chars().count() - 1 {
-                    pieces.push(input[si..ei + 1].trim().to_string());
+                    //pieces.push(input[si..ei + 1].trim().to_string());
+                    piece = input[si..ei + 1].trim();
                 } else {
                     if ei > si {
-                        pieces.push(input[si..ei].trim().to_string());
+                        //pieces.push(input[si..ei].trim().to_string());
+                        piece = input[si..ei].trim();
                     }
                 }
+                if piece.len() > 0 {
+                    let first_char = piece.chars().next().unwrap();
+                    // Check first is enough? need check last???
+                    if first_char == DQUTE_CHAR {
+                        piece = &piece[1..piece.len() - 1];
+                    }
+                }
+                pieces.push(piece.to_string());
 
-                // i is SPACE, move si to next *non* space char
                 si = i + 1;
-                // reset
-                need_strip_quote = false;
             }
         } else if c == DQUTE_CHAR {
             if pc != BQUOTE_CHAR {
-                if !quoted {
-                    need_strip_quote = true;
-                }
                 quoted = !quoted;
             }
         }
