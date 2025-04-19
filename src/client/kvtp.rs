@@ -70,7 +70,8 @@ pub fn build_kvtp_message(input_data: InputData) -> Vec<u8> {
 
     //
     // TTL line
-    if input_data.ttl > 0 {
+    // -3: special value for GET key -ttl
+    if input_data.ttl > 0 || input_data.ttl == -3 {
         // TTL line
         for b in TTL_PREFIX_BYTES {
             message.push(*b);

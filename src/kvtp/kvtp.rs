@@ -19,7 +19,7 @@ pub struct KvtpMessage {
     pub command: String,
     pub key: String,
     pub args: String,
-    pub ttl: u64,
+    pub ttl: i32,
 
     pub body: Vec<u8>,
 }
@@ -41,7 +41,7 @@ impl KvtpMessage {
         let mut command = String::new();
         let mut key = String::new();
         let mut args = String::new();
-        let mut ttl: u64 = 0;
+        let mut ttl: i32 = 0;
 
         //Split message by line feed
         let lines = message.split(|&b| b == LINE_FEED);
@@ -104,7 +104,7 @@ impl KvtpMessage {
                                         break;
                                     }
                                 }
-                                let tmp = s_ttl.parse::<u64>();
+                                let tmp = s_ttl.parse::<i32>();
                                 match tmp {
                                     Ok(i) => ttl = i,
                                     Err(_) => {
@@ -143,16 +143,9 @@ impl KvtpMessage {
         Ok(akvp_msg)
     }
 
-    pub fn ttl_to_duration(&self) -> Option<Duration> {
-        if self.ttl > 0 {
-            return Some(Duration::from_secs(self.ttl));
-        }
-        None
-    }
-
     pub fn ttl_to_instant(&self) -> Option<Instant> {
         if self.ttl > 0 {
-            return Some(Instant::now() + Duration::from_secs(self.ttl));
+            return Some(Instant::now() + Duration::from_secs(self.ttl as u64));
         }
         None
     }

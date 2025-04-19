@@ -84,11 +84,11 @@ pub fn parse_input(input: &str) -> Result<InputData, String> {
     while i < pieces.len() {
         let piece = pieces[i].clone(); // clone may have performance issue
         if i == 0 {
-            cmd = piece.to_string();
+            cmd = piece.to_string().to_uppercase();
         } else {
             match cmd.as_str() {
                 // Match Command with key
-                "del" | "get" | "key" | "set" | "ttl" => {
+                "DEL" | "GET" | "KEY" | "SET" => {
                     match piece.as_str() {
                         // Match arg
                         ARG_EX | ARG_NX | ARG_DEL => {
@@ -96,19 +96,24 @@ pub fn parse_input(input: &str) -> Result<InputData, String> {
                         }
                         // Match ttl
                         ARG_TTL => {
-                            if i + 1 < pieces.len() {
-                                let ttl_val = pieces[i + 1].parse();
-                                match ttl_val {
-                                    Ok(val) => ttl = val,
-                                    Err(_) => {
-                                        error_msg = String::from("Invalid ttl");
-                                        break;
+                            if cmd == "SET" {
+                                if i + 1 < pieces.len() {
+                                    let ttl_val = pieces[i + 1].parse();
+                                    match ttl_val {
+                                        Ok(val) => ttl = val,
+                                        Err(_) => {
+                                            error_msg = String::from("Invalid ttl");
+                                            break;
+                                        }
                                     }
+                                    i += 1;
+                                } else {
+                                    error_msg = String::from("Invalid ttl");
+                                    break;
                                 }
-                                i += 1;
                             } else {
-                                error_msg = String::from("Invalid ttl");
-                                break;
+                                // For get key -ttl, the -ttl don't have value, just set 0
+                                ttl = -3;
                             }
                         }
                         // Match key and value
@@ -130,7 +135,6 @@ pub fn parse_input(input: &str) -> Result<InputData, String> {
     }
     // TODO
     // Validate
-
     if error_msg.len() == 0 {
         let input_data = InputData {
             cmd,

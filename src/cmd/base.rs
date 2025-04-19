@@ -19,6 +19,9 @@ pub const INV_TYP: &[u8] = "INV_TYP".as_bytes();
 pub const INV_SUB_KEY_FMT: &[u8] = "INV_SUB_KEY_FMT".as_bytes();
 pub const KEY_NOT_EX: &[u8] = "KEY_NOT_EX".as_bytes();
 
+pub const MINUS_1: i32 = -1;
+pub const MINUS_2: i32 = -2;
+
 // users[1]
 // users[1..5]
 // users[#]
