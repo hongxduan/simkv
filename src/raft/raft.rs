@@ -4,12 +4,12 @@
 //! date: 4 Apr, 2025
 //!
 
-use std::{collections::HashMap, time::Instant};
+use std::collections::HashMap;
 
-use super::heartbeat::Heartbeat;
+use tokio::time::Instant;
 
-const REQUTST_VOTE: u8 = 1;
-const REQUEST_HEARTBEAT: u8 = 2;
+use super::server;
+
 ///
 /// Node info
 ///
@@ -38,29 +38,21 @@ pub enum RaftRole {
 #[derive(Debug, Clone)]
 pub struct Raft {
     pub role: RaftRole,
+    pub last_hb: Instant, // Last heartbeat instant received from Leader
 }
 
 impl Raft {
     pub fn new() -> Self {
         Raft {
             role: RaftRole::Follower,
+            last_hb: Instant::now(),
         }
     }
-    ///
-    /// Recevie request from other nodes
-    ///
-    /// 1. Convert first byte to u8
-    ///
-    pub fn receive(&self, buf: &Vec<u8>) {
-        let icmd = u8::from_be_bytes([buf[0]]);
-        match icmd {
-            REQUTST_VOTE => {}
-            REQUEST_HEARTBEAT => {
-                //Heartbeat::receive(Self);
-            }
-            _ => {
-                println!("Invalid Raft request: {}", icmd);
-            }
-        }
+
+    pub async fn start() {
+        println!("Raft::start");
+        tokio::spawn(async {
+            let _t = server::run().await;
+        });
     }
 }

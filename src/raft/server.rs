@@ -14,6 +14,16 @@ use tokio::{
 
 use crate::raft::raft::Raft;
 
+use super::{heartbeat::Heartbeat, vote::Vote};
+
+const REQUTST_VOTE: u8 = 1;
+const REQUEST_HEARTBEAT: u8 = 2;
+
+///
+/// Run Raft server
+/// The port number is the port number of main server plus 10000
+/// i.e. if the main port is 8303, then the Raft port is 18303
+/// 
 pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
     let listener = TcpListener::bind("0.0.0.0:18303").await?;
 
@@ -74,13 +84,33 @@ impl Handler {
             }
             println!("{:?}", n);
 
-            let raft = self.raft.lock().unwrap();
+            let mut raft = self.raft.lock().unwrap();
             //Raft::receive(&buf);
-            raft.receive(&buf);
+            self.receive(&buf, &mut raft);
 
             if let Err(e) = self.socket.write_all(&buf[0..n]).await {
                 eprintln!("failed to write to socket; err = {:?}", e);
                 return Err(e);
+            }
+        }
+    }
+
+    ///
+    /// Recevie request from other nodes
+    ///
+    /// 1. Convert first byte to u8
+    ///
+    pub fn receive(&self, buf: &Vec<u8>, raft: &mut Raft) {
+        let icmd = u8::from_be_bytes([buf[0]]);
+        match icmd {
+            REQUTST_VOTE => {
+                Vote::receive();
+            }
+            REQUEST_HEARTBEAT => {
+                Heartbeat::receive(raft);
+            }
+            _ => {
+                println!("Invalid Raft request: {}", icmd);
             }
         }
     }

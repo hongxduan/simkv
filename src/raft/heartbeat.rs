@@ -4,14 +4,12 @@
 //! date: 22 Apr, 2025
 //!
 
-use tokio::sync::mpsc;
+use tokio::{sync::mpsc, time::Instant};
 
 use super::raft::{Raft, RaftRole};
 
 const HB_LOWER: u16 = 200; // random lower
 const HB_UPPER: u16 = 400; // random upper
-
-const VOTE_COOL_DOWN: u16 = 500;
 
 pub struct Heartbeat {}
 
@@ -25,9 +23,7 @@ impl Heartbeat {
             loop {
                 // If not leader then break, else keep looping
                 match raft.role {
-                    RaftRole::Leader => {
-                        
-                    }
+                    RaftRole::Leader => {}
                     RaftRole::Follower => {
                         break;
                     }
@@ -41,5 +37,8 @@ impl Heartbeat {
     ///
     /// Receive heartbeat request
     ///
-    pub fn receive(self) {}
+    pub fn receive(raft: &mut Raft) {
+        // Update last_hb
+        raft.last_hb = Instant::now();
+    }
 }

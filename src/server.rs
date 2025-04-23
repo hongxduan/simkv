@@ -32,8 +32,13 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
         .nth(1)
         .unwrap_or_else(|| "127.0.0.1:8303".to_string());
 
-    tokio::spawn(async {
+    /*tokio::spawn(async {
         let _ = crate::raft::server::run().await;
+    });*/
+    let _ = crate::raft::raft::Raft::start().await;
+
+    tokio::spawn(async {
+        let _= crate::raft::vote::Vote::supress().await;
     });
 
     let listener = TcpListener::bind("0.0.0.0:8303").await?;
