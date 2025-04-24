@@ -6,7 +6,6 @@
 
 use std::{
     collections::HashMap,
-    default,
     sync::{Arc, Mutex},
 };
 
@@ -82,7 +81,7 @@ impl Raft {
         };
 
         tokio::spawn(async move {
-            let _ = crate::raft::vote::Vote::supress(&raft_copy).await;
+            let _ = crate::raft::vote::Vote::vote(&raft_copy).await;
         });
 
         tokio::spawn(async move {

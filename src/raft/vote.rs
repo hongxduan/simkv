@@ -4,6 +4,10 @@
 //! date: 22 Apr 2025
 //!
 
+use std::time::{Duration};
+
+use tokio::time::Instant;
+
 use super::raft::Raft;
 
 const VOTE_COOL_DOWN: i64 = 500;
@@ -28,7 +32,7 @@ impl Vote {
     /// Then start to send vote request
     /// Else, cool down and then repeat
     ///
-    pub async fn supress(raft: &Raft) {
+    pub async fn vote(raft: &Raft) {
         let mut interval_timer = tokio::time::interval(
             chrono::Duration::milliseconds(VOTE_COOL_DOWN)
                 .to_std()
@@ -36,15 +40,26 @@ impl Vote {
         );
         loop {
             interval_timer.tick().await;
-            //let raft = raft_acc1.lock().unwrap();
-            let copy = raft.clone();
-            tokio::task::spawn_blocking(move || Self::do_supress(&copy));
+
+            let shared = raft.shared.state.lock().unwrap();
+
+            match shared.role {
+                super::raft::RaftRole::Leader => {
+                    break;
+                }
+                super::raft::RaftRole::Follower => {}
+            }
+
+            let duration = Duration::from_millis(VOTE_COOL_DOWN as u64);
+            // Didn't received heartbeat from Leader in VOTE_COOL_DOWN period
+            // Then start to send vote request
+            if shared.last_hb + duration  < Instant::now(){
+                tokio::task::spawn_blocking(move || Self::do_vote());
+            }
         }
     }
 
-    fn do_supress(raft: &Raft) {
-        let shared = raft.shared.state.lock().unwrap();
-
-        println!("vote::do_supress: {:?}", shared.last_hb);
+    fn do_vote() {
+        println!("do_vote");
     }
 }
