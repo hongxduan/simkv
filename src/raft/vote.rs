@@ -4,9 +4,7 @@
 //! date: 22 Apr 2025
 //!
 
-use std::sync::{Arc, Mutex};
-
-use super::raft::{Raft};
+use super::raft::Raft;
 
 const VOTE_COOL_DOWN: i64 = 500;
 

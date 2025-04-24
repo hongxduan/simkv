@@ -12,7 +12,7 @@ use std::{
 
 use tokio::{net::TcpListener, time::Instant};
 
-use crate::raft::server::Handler;
+use crate::raft::handler::Handler;
 
 ///
 /// Node info
@@ -90,21 +90,6 @@ impl Raft {
         });
 
         Ok(())
-    }
-
-    async fn run(listener: TcpListener, raft: &Raft) -> Result<(), Box<dyn std::error::Error>> {
-        // Accept loop
-        loop {
-            let (socket, _) = listener.accept().await?;
-            println!("raft::server::accept");
-            //let raft = Arc::clone(&raft_arc);
-            //let raft = raft_arc1.lock().unwrap();
-            let mut handler = Handler {
-                socket,
-                raft: raft.clone(),
-            };
-            let _ = handler.process().await;
-        }
     }
 }
 

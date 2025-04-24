@@ -1,11 +1,7 @@
-//! Raft server for internal communication
-//!
-//! Run this server if the node init or join cluster
+//! Raft request Handler
 //!
 //! author: Duan HongXing
 //! date: 20 Apr, 2025 Changi airport
-
-use std::{os::macos::raw::stat, sync::{Arc, Mutex}};
 
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
@@ -19,29 +15,6 @@ use super::{heartbeat::Heartbeat, vote::Vote};
 
 const REQUTST_VOTE: u8 = 1;
 const REQUEST_HEARTBEAT: u8 = 2;
-
-///
-/// Run Raft server
-/// The port number is the port number of main server plus 10000
-/// i.e. if the main port is 8303, then the Raft port is 18303
-///
-/*pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
-    let listener = TcpListener::bind("0.0.0.0:18303").await?;
-
-    let raft_arc = Arc::new(Mutex::new(Raft::new()));
-
-    // Accept loop
-    loop {
-        let (socket, _) = listener.accept().await?;
-        println!("raft::server::accept");
-        //let raft = Arc::clone(&raft_arc);
-        let raft = raft_arc.clone();
-        let handler = Handler { socket, raft };
-        tokio::spawn(async move {
-            let _ = handler.process();
-        });
-    }
-}*/
 
 pub struct Handler {
     pub socket: TcpStream,
@@ -107,7 +80,7 @@ impl Handler {
     pub fn receive(&self, buf: &Vec<u8>, raft: &Raft) {
         let mut state = raft.shared.state.lock().unwrap();
         state.last_hb = Instant::now();
-    
+
         let icmd = u8::from_be_bytes([buf[0]]);
         match icmd {
             REQUTST_VOTE => {

@@ -6,5 +6,5 @@
 
 pub mod heartbeat;
 pub mod raft;
-pub mod server;
+pub mod handler;
 pub mod vote;

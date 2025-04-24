@@ -32,9 +32,6 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
         .nth(1)
         .unwrap_or_else(|| "127.0.0.1:8303".to_string());
 
-    /*tokio::spawn(async {
-        let _ = crate::raft::server::run().await;
-    });*/
     tokio::spawn(async {
         let _ = crate::raft::raft::Raft::start().await;
     });
