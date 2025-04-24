@@ -35,10 +35,8 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
     /*tokio::spawn(async {
         let _ = crate::raft::server::run().await;
     });*/
-    let _ = crate::raft::raft::Raft::start().await;
-
     tokio::spawn(async {
-        let _= crate::raft::vote::Vote::supress().await;
+        let _ = crate::raft::raft::Raft::start().await;
     });
 
     let listener = TcpListener::bind("0.0.0.0:8303").await?;

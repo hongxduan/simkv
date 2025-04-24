@@ -17,12 +17,13 @@ impl Heartbeat {
     ///
     /// Send heartbeat request
     ///
-    pub fn send(mut raft: Raft) {
+    pub fn send(raft: Raft) {
         //let (tx, rx) = mpsc::channel(1);
         tokio::spawn(async move {
             loop {
                 // If not leader then break, else keep looping
-                match raft.role {
+                let shared = raft.shared.state.lock().unwrap();
+                match shared.role {
                     RaftRole::Leader => {}
                     RaftRole::Follower => {
                         break;
@@ -37,8 +38,9 @@ impl Heartbeat {
     ///
     /// Receive heartbeat request
     ///
-    pub fn receive(raft: &mut Raft) {
+    pub fn receive(raft: Raft) {
         // Update last_hb
-        raft.last_hb = Instant::now();
+        let mut shared = raft.shared.state.lock().unwrap();
+        shared.last_hb = Instant::now();
     }
 }

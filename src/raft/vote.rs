@@ -4,6 +4,10 @@
 //! date: 22 Apr 2025
 //!
 
+use std::sync::{Arc, Mutex};
+
+use super::raft::{Raft};
+
 const VOTE_COOL_DOWN: i64 = 500;
 
 pub struct Vote {}
@@ -26,7 +30,7 @@ impl Vote {
     /// Then start to send vote request
     /// Else, cool down and then repeat
     ///
-    pub async fn supress() {
+    pub async fn supress(raft: &Raft) {
         let mut interval_timer = tokio::time::interval(
             chrono::Duration::milliseconds(VOTE_COOL_DOWN)
                 .to_std()
@@ -34,11 +38,15 @@ impl Vote {
         );
         loop {
             interval_timer.tick().await;
-            tokio::task::spawn_blocking(|| Self::do_supress());
+            //let raft = raft_acc1.lock().unwrap();
+            let copy = raft.clone();
+            tokio::task::spawn_blocking(move || Self::do_supress(&copy));
         }
     }
 
-    fn do_supress() {
-        println!("do_supress");
+    fn do_supress(raft: &Raft) {
+        let shared = raft.shared.state.lock().unwrap();
+
+        println!("vote::do_supress: {:?}", shared.last_hb);
     }
 }

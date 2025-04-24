@@ -5,11 +5,12 @@
 //! author: Duan HongXing
 //! date: 20 Apr, 2025 Changi airport
 
-use std::sync::{Arc, Mutex};
+use std::{os::macos::raw::stat, sync::{Arc, Mutex}};
 
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
-    net::{TcpListener, TcpStream},
+    net::TcpStream,
+    time::Instant,
 };
 
 use crate::raft::raft::Raft;
@@ -23,8 +24,8 @@ const REQUEST_HEARTBEAT: u8 = 2;
 /// Run Raft server
 /// The port number is the port number of main server plus 10000
 /// i.e. if the main port is 8303, then the Raft port is 18303
-/// 
-pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
+///
+/*pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
     let listener = TcpListener::bind("0.0.0.0:18303").await?;
 
     let raft_arc = Arc::new(Mutex::new(Raft::new()));
@@ -40,15 +41,16 @@ pub async fn run() -> Result<(), Box<dyn std::error::Error>> {
             let _ = handler.process();
         });
     }
-}
+}*/
 
-struct Handler {
-    socket: TcpStream,
-    raft: Arc<Mutex<Raft>>,
+pub struct Handler {
+    pub socket: TcpStream,
+    pub raft: Raft,
 }
 
 impl Handler {
-    pub async fn process(mut self) -> Result<(), std::io::Error> {
+    pub async fn process(&mut self) -> Result<(), std::io::Error> {
+        println!("Handler::process");
         loop {
             // buffer for request length
             let mut lbuf: [u8; 4] = [0, 0, 0, 0];
@@ -82,11 +84,13 @@ impl Handler {
                     }
                 };
             }
+            //let mut shared = self.raft.shared.state.lock().unwrap();
+            //shared.last_hb = Instant::now();
             println!("{:?}", n);
 
-            let mut raft = self.raft.lock().unwrap();
+            //let mut raft = self.raft.lock().unwrap();
             //Raft::receive(&buf);
-            self.receive(&buf, &mut raft);
+            self.receive(&buf, &self.raft);
 
             if let Err(e) = self.socket.write_all(&buf[0..n]).await {
                 eprintln!("failed to write to socket; err = {:?}", e);
@@ -100,14 +104,17 @@ impl Handler {
     ///
     /// 1. Convert first byte to u8
     ///
-    pub fn receive(&self, buf: &Vec<u8>, raft: &mut Raft) {
+    pub fn receive(&self, buf: &Vec<u8>, raft: &Raft) {
+        let mut state = raft.shared.state.lock().unwrap();
+        state.last_hb = Instant::now();
+    
         let icmd = u8::from_be_bytes([buf[0]]);
         match icmd {
             REQUTST_VOTE => {
                 Vote::receive();
             }
             REQUEST_HEARTBEAT => {
-                Heartbeat::receive(raft);
+                Heartbeat::receive(self.raft.clone());
             }
             _ => {
                 println!("Invalid Raft request: {}", icmd);
