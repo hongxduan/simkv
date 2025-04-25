@@ -12,8 +12,9 @@ use super::config::Config;
 
 /// Run
 pub async fn run(config: Config) -> Result<(), Box<dyn std::error::Error>> {
-    tokio::spawn(async {
-        let _ = crate::raft::raft::Raft::start().await;
+    let config_copy = config.clone();
+    tokio::spawn(async move {
+        let _ = crate::raft::raft::Raft::start(config_copy).await;
     });
 
     let addr = format!("{}:{}", config.server.host, config.server.port);

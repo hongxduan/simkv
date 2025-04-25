@@ -9,9 +9,10 @@ use std::{
     sync::{Arc, Mutex},
 };
 
+use chrono::format::format;
 use tokio::{net::TcpListener, time::Instant};
 
-use crate::raft::handler::Handler;
+use crate::{raft::handler::Handler, server::config::Config};
 
 ///
 /// Node info
@@ -66,10 +67,12 @@ impl Raft {
         }
     }
 
-    pub async fn start() -> Result<(), Box<dyn std::error::Error>> {
+    pub async fn start(config: Config) -> Result<(), Box<dyn std::error::Error>> {
         println!("Raft::start");
 
-        let tpc_listener = TcpListener::bind("0.0.0.0:18303").await?;
+        let port = config.server.port + 10000;
+        let adrr = format!("{}:{}", config.server.host, port);
+        let tpc_listener = TcpListener::bind(adrr).await?;
 
         let raft = Raft::new();
         let raft_copy = raft.clone();
