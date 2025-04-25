@@ -13,6 +13,7 @@ mod db;
 mod kvtp;
 mod raft;
 mod server;
+mod utils;
 
 #[derive(Parser, Debug)]
 #[command(version, about, disable_help_flag=true, long_about = None)]

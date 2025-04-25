@@ -8,7 +8,11 @@ use serde::Deserialize;
 
 #[derive(Clone, Deserialize)]
 pub struct Config {
-    pub server: Server,
+    //pub server: Server,
+    pub host: String,
+    pub port: u16,
+    pub datadir: String,
+    pub logdir: String,
 }
 
 #[derive(Clone, Deserialize)]

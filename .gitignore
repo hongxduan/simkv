@@ -2,3 +2,6 @@
 
 # for config files
 /configs
+
+# for test data folder
+/data*

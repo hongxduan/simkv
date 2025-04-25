@@ -34,7 +34,7 @@ impl Command {
             Command::Del(del) => del.execute(db),
             Command::Key(key) => key.execute(),
             Command::Set(set) => set.execute(db),
-            Command::CInit(ttl) => ttl.execute(),
+            Command::CInit(cinit) => cinit.execute(),
             Command::Unknown(unknown) => unknown.execute(),
         };
 

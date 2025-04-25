@@ -3,24 +3,31 @@
 //! author: Duan HongXing
 //! date: 4 Apr, 2025
 //!
-
 use std::{
     collections::HashMap,
+    f32::consts::E,
+    fs::File,
+    io::{Read, Write},
+    path::{MAIN_SEPARATOR, Path},
     sync::{Arc, Mutex},
 };
 
-use chrono::format::format;
 use tokio::{net::TcpListener, time::Instant};
 
 use crate::{raft::handler::Handler, server::config::Config};
+use serde::{Deserialize, Serialize};
+
+const RAFT_DATA_FILE_NAME: &str = "__raft_data__.json";
+const NODE_FILE_NAME: &str = "__node__.json";
 
 ///
 /// Node info
 ///
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Node {
-    id: String,
-    ip: String,
-    port: u16,
+    pub id: String,
+    pub ip: String,
+    pub port: u16,
 }
 
 ///
@@ -67,11 +74,74 @@ impl Raft {
         }
     }
 
+    ///
+    ///
+    ///
+    pub fn init(config: Config) {
+        let node_path = format!("{}{}{}", config.datadir, MAIN_SEPARATOR, NODE_FILE_NAME);
+        let path = Path::new(&node_path);
+        let display = path.display();
+
+        if path.exists() {
+            let mut file = match File::open(path) {
+                Ok(file) => file,
+                Err(e) => {
+                    panic!("could not open {}: {}", display, e);
+                }
+            };
+
+            let mut content = String::new();
+            match file.read_to_string(&mut content) {
+                Ok(s) => {}
+                Err(e) => {
+                    panic!("could not read file {}: {}", display, e);
+                }
+            }
+            let result = serde_json::from_str::<Node>(&content);
+            match result {
+                Ok(node) => {
+                    println!("Raft::init- {:?}", node);
+                }
+                Err(e) => {
+                    panic!("could not parse node file {}:{}", display, e)
+                }
+            }
+        } else {
+            let node_id = crate::utils::strutil::generate_random_string(16);
+            let node = Node {
+                id: node_id,
+                ip: config.host,
+                port: config.port,
+            };
+            let result = serde_json::to_string(&node);
+            match result {
+                Ok(content) => {
+                    let mut file = match File::create_new(path) {
+                        Ok(file) => file,
+                        Err(e) => {
+                            panic!("could not create node file: {}:{}", display, e);
+                        }
+                    };
+                    let result = file.write_all(content.as_bytes());
+                    match result {
+                        Ok(()) => {}
+                        Err(e) => {
+                            panic!("could not write node file: {}:{}", display, e);
+                        }
+                    }
+                }
+                Err(e) => {
+                    panic!("could not serialize node: {}", e);
+                }
+            }
+        }
+    }
+
     pub async fn start(config: Config) -> Result<(), Box<dyn std::error::Error>> {
         println!("Raft::start");
 
-        let port = config.server.port + 10000;
-        let adrr = format!("{}:{}", config.server.host, port);
+        let port = config.port + 10000;
+        let adrr = format!("{}:{}", config.host, port);
         let tpc_listener = TcpListener::bind(adrr).await?;
 
         let raft = Raft::new();
