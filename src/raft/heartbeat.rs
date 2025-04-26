@@ -4,9 +4,9 @@
 //! date: 22 Apr, 2025
 //!
 
-use tokio::{sync::mpsc, time::Instant};
+use tokio::time::Instant;
 
-use super::raft::{Raft, RaftRole};
+use super::raft::{GLOBAL_RAFT_STATE, Raft, RaftRole};
 
 const HB_LOWER: u16 = 200; // random lower
 const HB_UPPER: u16 = 400; // random upper
@@ -17,22 +17,25 @@ impl Heartbeat {
     ///
     /// Send heartbeat request
     ///
-    pub fn send(raft: Raft) {
-        //let (tx, rx) = mpsc::channel(1);
-        tokio::spawn(async move {
-            loop {
-                // If not leader then break, else keep looping
-                let shared = raft.shared.state.lock().unwrap();
-                match shared.role {
-                    RaftRole::Leader => {}
-                    RaftRole::Follower => {
-                        break;
-                    }
-                }
+    pub async fn send() {
+        let mut interval_timer =
+            tokio::time::interval(chrono::Duration::milliseconds(300).to_std().unwrap());
+        loop {
+            interval_timer.tick().await;
 
-                // TODO: sending heartbeat to each follower
-            }
-        });
+            let read_lock = GLOBAL_RAFT_STATE.read().unwrap();
+            let _ = match read_lock.role {
+                RaftRole::Follower => break,
+                RaftRole::Leader => {}
+            };
+            drop(read_lock);
+
+            tokio::task::spawn_blocking(move || Self::do_send());
+        }
+    }
+
+    fn do_send() {
+        println!("sending heartbeat");
     }
 
     ///

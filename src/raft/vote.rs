@@ -4,7 +4,7 @@
 //! date: 22 Apr 2025
 //!
 
-use std::time::{Duration};
+use std::time::Duration;
 
 use tokio::time::Instant;
 
@@ -53,13 +53,13 @@ impl Vote {
             let duration = Duration::from_millis(VOTE_COOL_DOWN as u64);
             // Didn't received heartbeat from Leader in VOTE_COOL_DOWN period
             // Then start to send vote request
-            if shared.last_hb + duration  < Instant::now(){
+            if shared.last_hb + duration < Instant::now() {
                 tokio::task::spawn_blocking(move || Self::do_vote());
             }
         }
     }
 
     fn do_vote() {
-        println!("do_vote");
+        //println!("do_vote");
     }
 }
