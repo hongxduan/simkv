@@ -6,7 +6,7 @@
 
 use clap::Parser;
 use config_file::FromConfigFile;
-use server::config::Config;
+use server::config::{Config, GLOBAL_CONFIG};
 
 mod cmd;
 mod db;
@@ -28,5 +28,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
     let config = Config::from_config_file(args.config).unwrap();
 
-    crate::server::server::run(config).await
+    let mut config_lock = GLOBAL_CONFIG.write().unwrap();
+    config_lock.config = config;
+    drop(config_lock);
+
+    crate::server::server::run().await
 }

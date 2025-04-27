@@ -6,14 +6,19 @@
 use std::{
     collections::HashMap,
     fs::File,
-    io::{Read, Write},
+    io::{Error, Read, Write},
     path::{MAIN_SEPARATOR, Path},
     sync::{Arc, Mutex, RwLock},
+    time::{SystemTime, UNIX_EPOCH},
 };
 
-use tokio::{net::TcpListener, time::Instant};
+use tokio::{net::TcpListener, sync::mpsc::UnboundedReceiver, time::Instant};
 
-use crate::{raft::handler::Handler, server::config::Config};
+use crate::{
+    raft::handler::Handler,
+    server::config::{Config, GLOBAL_CONFIG},
+    utils::strutil,
+};
 use serde::{Deserialize, Serialize};
 
 use lazy_static::lazy_static;
@@ -44,11 +49,20 @@ pub struct BucketNode {
 ///
 /// Raft data that need sync by leader to all followers
 ///
+#[derive(Debug, Serialize, Deserialize)]
 pub struct RaftData {
-    leader_node_id: String,
-    nodes: HashMap<String, Node>,
-    buckets: HashMap<u16, BucketNode>, // bucket_id on which node_id
-    ts: Instant,                       // when updated
+    pub leader_node_id: String,
+    pub nodes: HashMap<String, Node>,
+    //buckets: HashMap<u16, BucketNode>, // bucket_id on which node_id
+    pub ts: u64, // when updated
+}
+
+///
+///
+///
+#[derive(Debug, Serialize, Deserialize)]
+pub struct GlobalRaftData {
+    pub raft_data: RaftData,
 }
 
 ///
@@ -91,12 +105,13 @@ lazy_static! {
         role: RaftRole::Follower,
         last_hb: Instant::now()
     });
-    pub static ref GLOBAL_RAFT_DATA: RwLock<RaftData> = RwLock::new(RaftData {
+
+    pub static ref GLOBAL_RAFT_DATA: RwLock<GlobalRaftData> = RwLock::new(GlobalRaftData { raft_data: RaftData{
         leader_node_id: String::from(""),
         nodes: HashMap::new(),
-        buckets: HashMap::new(),
-        ts: Instant::now()
-    });
+        //buckets: HashMap::new(),
+        ts: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs()
+    }});
 }
 
 impl Raft {
@@ -111,11 +126,97 @@ impl Raft {
         }
     }
 
+    pub fn init() -> Result<(), String> {
+        let config_lock = GLOBAL_CONFIG.read().unwrap();
+
+        // TODO: validate if already raft
+        let raft_path = format!(
+            "{}{}{}",
+            config_lock.config.datadir, MAIN_SEPARATOR, RAFT_DATA_FILE_NAME
+        );
+        let path = Path::new(&raft_path);
+        let display = path.display();
+        if path.exists() {
+            return Err("Node already member of cluster".to_string());
+        }
+
+        let node_lock = GLOBAL_NODE_INFO.read().unwrap();
+        println!("Raft::init- {}", node_lock.host.clone());
+
+        // Set Raft State role to Leader
+        let mut raft_state_lock = GLOBAL_RAFT_STATE.write().unwrap();
+        raft_state_lock.role = RaftRole::Leader;
+        let _ = raft_state_lock.role_updated(RaftRole::Leader);
+        drop(raft_state_lock);
+
+        // Set Raft Data
+        let mut nodes: HashMap<String, Node> = HashMap::new();
+        nodes.insert(
+            node_lock.id.clone(),
+            Node {
+                id: node_lock.id.clone(),
+                host: node_lock.host.clone(),
+                port: node_lock.port,
+            },
+        );
+
+        // Drop lock
+        drop(node_lock);
+
+        let raft_data = RaftData {
+            leader_node_id: strutil::generate_random_string(10),
+            nodes: nodes,
+            ts: SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_secs(),
+        };
+
+        // Write Raft data to file
+        // Serialize RaftData
+        let result = serde_json::to_string(&raft_data);
+        match result {
+            Ok(content) => {
+                let mut file = match File::create_new(path) {
+                    Ok(file) => file,
+                    Err(e) => {
+                        panic!("could not create raft file: {}:{}", display, e);
+                    }
+                };
+                // Write to file
+                let result = file.write_all(content.as_bytes());
+                match result {
+                    Ok(()) => {
+                        let mut raft_data_lock = GLOBAL_RAFT_DATA.write().unwrap();
+                        raft_data_lock.raft_data = raft_data;
+                        drop(raft_data_lock);
+                    }
+                    Err(e) => {
+                        panic!("could not write node file: {}:{}", display, e);
+                    }
+                }
+            }
+            Err(e) => {
+                return Err(e.to_string());
+            }
+        }
+
+        // Drop
+        drop(config_lock);
+
+        return Ok(());
+    }
+
     ///
     /// Check node file exsit or not when server start
     ///
-    pub fn init(config: Config) {
-        let node_path = format!("{}{}{}", config.datadir, MAIN_SEPARATOR, NODE_FILE_NAME);
+    pub fn pre_start() {
+        let config_lock = GLOBAL_CONFIG.read().unwrap();
+
+        let node_path = format!(
+            "{}{}{}",
+            config_lock.config.datadir, MAIN_SEPARATOR, NODE_FILE_NAME
+        );
         let path = Path::new(&node_path);
         let display = path.display();
 
@@ -138,10 +239,10 @@ impl Raft {
             let result = serde_json::from_str::<Node>(&content);
             match result {
                 Ok(node) => {
-                    println!("Raft::init- {:?}", node);
+                    println!("Raft::pre_start- {:?}", node);
                     let mut write_lock = GLOBAL_NODE_INFO.write().unwrap();
-                    write_lock.host = config.host;
-                    write_lock.port = config.port;
+                    write_lock.host = config_lock.config.host.clone();
+                    write_lock.port = config_lock.config.port;
                     write_lock.id = node.id;
                     drop(write_lock);
                 }
@@ -154,8 +255,8 @@ impl Raft {
             let node_id = crate::utils::strutil::generate_random_string(16);
             let node = Node {
                 id: node_id.clone(),
-                host: config.host.clone(),
-                port: config.port,
+                host: config_lock.config.host.clone(),
+                port: config_lock.config.port,
             };
             let result = serde_json::to_string(&node);
             match result {
@@ -170,8 +271,8 @@ impl Raft {
                     match result {
                         Ok(()) => {
                             let mut write_lock = GLOBAL_NODE_INFO.write().unwrap();
-                            write_lock.host = config.host;
-                            write_lock.port = config.port;
+                            write_lock.host = config_lock.config.host.clone();
+                            write_lock.port = config_lock.config.port;
                             write_lock.id = node_id;
                             drop(write_lock);
                         }
@@ -185,14 +286,13 @@ impl Raft {
                 }
             }
         }
+        drop(config_lock);
     }
 
-    pub async fn start(config: Config) -> Result<(), Box<dyn std::error::Error>> {
+    pub async fn start(addr: String) -> Result<(), Box<dyn std::error::Error>> {
         println!("Raft::start");
 
-        let port = config.port + 10000;
-        let adrr = format!("{}:{}", config.host, port);
-        let tpc_listener = TcpListener::bind(adrr).await?;
+        let tpc_listener = TcpListener::bind(addr).await?;
 
         let raft = Raft::new();
         let raft_copy = raft.clone();

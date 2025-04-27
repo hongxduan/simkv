@@ -35,15 +35,17 @@ impl Heartbeat {
     }
 
     fn do_send() {
-        println!("sending heartbeat");
+        //println!("sending heartbeat");
+        // TODO: send 
     }
 
     ///
     /// Receive heartbeat request
     ///
-    pub fn receive(raft: Raft) {
+    pub fn receive() {
         // Update last_hb
-        let mut shared = raft.shared.state.lock().unwrap();
-        shared.last_hb = Instant::now();
+        let mut write_lock = GLOBAL_RAFT_STATE.write().unwrap();
+        write_lock.last_hb = Instant::now();
+        drop(write_lock);
     }
 }

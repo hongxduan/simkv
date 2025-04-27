@@ -13,8 +13,8 @@ use crate::raft::raft::Raft;
 
 use super::{heartbeat::Heartbeat, vote::Vote};
 
-const REQUTST_VOTE: u8 = 1;
-const REQUEST_HEARTBEAT: u8 = 2;
+const RAFT_VOTE: u8 = 1;
+const RAFT_HEARTBEAT: u8 = 2;
 
 pub struct Handler {
     pub socket: TcpStream,
@@ -83,11 +83,11 @@ impl Handler {
 
         let icmd = u8::from_be_bytes([buf[0]]);
         match icmd {
-            REQUTST_VOTE => {
+            RAFT_VOTE => {
                 Vote::receive();
             }
-            REQUEST_HEARTBEAT => {
-                Heartbeat::receive(self.raft.clone());
+            RAFT_HEARTBEAT => {
+                Heartbeat::receive();
             }
             _ => {
                 println!("Invalid Raft request: {}", icmd);
