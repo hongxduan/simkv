@@ -8,10 +8,15 @@
 
 #include "../config/config.h"
 
+#define BUF_SIZE 1024;
+#define MAX_CONNECTIONS 1000;
+
 class Server {
 
     private:
     Config config;
+    void startSelectServer();
+    void startEpollServer();
 
     public:
     Server(Config config);
