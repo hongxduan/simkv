@@ -6,5 +6,9 @@ set(CMAKE_CXX_STANDARD 20)
 add_executable(simkv main.cpp
         posix/server.cpp
         posix/server.h
-        parser/cnf_parser.cpp
-        parser/cnf_parser.h)
+        config/cnf_parser.cpp
+        config/cnf_parser.h
+        utility/string_utility.cpp
+        utility/string_utility.h
+        config/config.cpp
+        config/config.h)

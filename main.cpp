@@ -1,12 +1,14 @@
 #include <iostream>
 
-#include "parser/cnf_parser.h"
+#include "config/cnf_parser.h"
 #include "posix/server.h"
+#include "config/config.h"
 // TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 int main() {
 
     // Parse config
-    parse();
+    auto config = Config();
+    config.parse();
     auto *tcp_server = new server();// TIP Press <shortcut actionId="RenameElement"/> when your caret is at the <b>lang</b> variable name to see how CLion can help you rename it.
     tcp_server->create();
 
