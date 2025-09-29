@@ -32,7 +32,10 @@ void Config::validate(std::map<std::string, std::string> map) {
             // validate host is IP address
 
             // validate port is unsigned number
+            char *end;
+            uint16_t iPort = strtol(port.c_str(), &end, 10);
             setHost(host);
+            setPort(iPort);
         }
     }
 }

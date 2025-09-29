@@ -9,8 +9,11 @@ int main() {
     // Parse config
     auto config = Config();
     config.parse();
-    auto *tcp_server = new server();// TIP Press <shortcut actionId="RenameElement"/> when your caret is at the <b>lang</b> variable name to see how CLion can help you rename it.
+    auto *tcp_server = new Server(config);
     tcp_server->create();
+
+    // Clear
+    delete tcp_server;
 
     return 0;
     // TIP See CLion help at <a href="https://www.jetbrains.com/help/clion/">jetbrains.com/help/clion/</a>. Also, you can try interactive lessons for CLion by selecting 'Help | Learn IDE Features' from the main menu.

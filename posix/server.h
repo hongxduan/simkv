@@ -6,8 +6,16 @@
 #define SIMKV_SERVER_H
 
 
-class server {
-    public: void create();
+#include "../config/config.h"
+
+class Server {
+
+    private:
+    Config config;
+
+    public:
+    Server(Config config);
+    void create();
 };
 
 
