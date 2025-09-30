@@ -11,4 +11,9 @@ add_executable(simkv main.cpp
         utility/string_utility.cpp
         utility/string_utility.h
         config/config.cpp
-        config/config.h)
+        config/config.h
+        db/partition.cpp
+        db/partition.h
+        db/value.cpp
+        db/value.h
+)

@@ -148,7 +148,7 @@ void Server::startEpollServer() {
 }
 
 
-void Server::create() {
+void Server::start() {
     std::cout << "Server starting" << std::endl;
 
     std::cout << "Host: " << config.getHost() << " " << "Port: " << config.getPort() << std::endl;

@@ -10,7 +10,7 @@ int main() {
     auto config = Config();
     config.parse();
     auto *tcp_server = new Server(config);
-    tcp_server->create();
+    tcp_server->start();
 
     // Clear
     delete tcp_server;

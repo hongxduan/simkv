@@ -20,7 +20,7 @@ class Server {
 
     public:
     Server(Config config);
-    void create();
+    void start();
 };
 
 
