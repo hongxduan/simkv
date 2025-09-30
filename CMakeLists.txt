@@ -16,4 +16,9 @@ add_executable(simkv main.cpp
         db/partition.h
         db/value.cpp
         db/value.h
+        executor/executor.cpp
+        executor/executor.h
+        executor/command.h
+        kvtp/request.cpp
+        kvtp/request.h
 )

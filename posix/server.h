@@ -15,8 +15,10 @@ class Server {
 
     private:
     Config config;
+    std::vector<int> clientList; // for storing all the client fd
     void startSelectServer();
     void startEpollServer();
+    std::vector<uint8_t> handler(int fd, int i);
 
     public:
     Server(Config config);

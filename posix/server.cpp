@@ -4,6 +4,8 @@
 #include "server.h"
 
 #include <iostream>
+#include <vector>
+
 #ifdef __APPLE__
 #include <sys/select.h>
 #endif
@@ -79,7 +81,7 @@ void Server::startSelectServer() {
     int maxfd;
     int sd = 0;
     int activity;
-    std::vector<int> clientList; // for storing all the client fd
+    //std::vector<int> clientList; // for storing all the client fd
     while (true) {
         FD_ZERO(&readfds);
         FD_SET(serverFD, &readfds);
@@ -125,6 +127,8 @@ void Server::startSelectServer() {
         for (int i = 0; i < clientList.size(); i++) {
             sd = clientList[i];
             if (FD_ISSET(sd, &readfds)) {
+                handler(sd, i);
+                /*
                 valread = read(sd, buffer, bufsize);
                 // check if client disconnected
                 if (valread == 0) {
@@ -137,6 +141,7 @@ void Server::startSelectServer() {
                 } else {
                     std::cerr << "message from client: " << buffer << "\n";
                 }
+                */
             }
         }
     }
@@ -147,6 +152,32 @@ void Server::startEpollServer() {
 
 }
 
+/*
+ * handle client socket
+ */
+std::vector<uint8_t> Server::handler(int fd, int i) {
+    std::vector<uint8_t> response;
+
+    size_t valread;
+    auto bufsize = BUF_SIZE;
+    char buffer[bufsize + 1];
+    struct sockaddr_in clientAddr;
+
+    valread = read(fd, buffer, bufsize);
+    // check if client disconnected
+    if (valread == 0) {
+        std::cerr << "client disconnected.\n";
+        getpeername(fd, (struct sockaddr *) &clientAddr, (socklen_t *) &clientAddr);
+        std::cout << "client disconnected, ip is: " << inet_ntoa(clientAddr.sin_addr)
+                << "port is: " << ntohs(clientAddr.sin_port) << std::endl;
+        close(fd);
+        clientList.erase(clientList.begin() + i);
+    } else {
+        std::cerr << "message from client: " << buffer << "\n";
+    }
+
+    return response;
+}
 
 void Server::start() {
     std::cout << "Server starting" << std::endl;
