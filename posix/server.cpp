@@ -149,7 +149,6 @@ void Server::startSelectServer() {
 
 
 void Server::startEpollServer() {
-
 }
 
 /*
@@ -173,7 +172,8 @@ std::vector<uint8_t> Server::handler(int fd, int i) {
         close(fd);
         clientList.erase(clientList.begin() + i);
     } else {
-        std::cerr << "message from client: " << buffer << "\n";
+        std::cout << std::strlen(buffer) << std::endl;
+        std::cout << "message from client: " << std::endl << buffer << "\n";
     }
 
     return response;

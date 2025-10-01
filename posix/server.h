@@ -11,6 +11,11 @@
 #define BUF_SIZE 1024;
 #define MAX_CONNECTIONS 1000;
 
+/*
+ *
+ *
+ *
+ */
 class Server {
 
     private:

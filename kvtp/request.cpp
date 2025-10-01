@@ -4,7 +4,7 @@
 
 #include "request.h"
 
-kvtp::KvtpRequest kvtp::parseRequest(std::vector<uint8_t> request) {
+kvtp::KvtpRequest kvtp::decodeRequest(std::vector<uint8_t> request) {
     kvtp::KvtpRequest kvtp_request;
 
 

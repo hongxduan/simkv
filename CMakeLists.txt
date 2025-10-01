@@ -21,4 +21,6 @@ add_executable(simkv main.cpp
         executor/command.h
         kvtp/request.cpp
         kvtp/request.h
+        kvtp/response.cpp
+        kvtp/response.h
 )

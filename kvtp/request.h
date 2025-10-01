@@ -6,41 +6,47 @@
 #define SIMKV_REQUEST_H
 
 #include <vector>
-/*
- * Key-Value Transport Protocol Header
- *
- *
- *
- *
- */
+
+
+/****************** KVTP Request ****************************
+KVTP/1              ...... Protocol (Must be the first line)
+CMD: GET|SET        ...... Command
+KEY: k1|users[1]    ...... Key
+ARGS: EX|NX         ...... Arguments (Optional)
+TTL: 0              ...... Time To Live (Optional)
+                    ...... Empty line(Header Body separator)
+Body                ...... Body
+************************************************************/
+
+//
+// Key-Value Transport Protocol Header
+//
 namespace kvtp {
-    /*
-     * Kvtp request data type
-     */
+    // Kvtp request data type
     struct KvtpRequest {
-        /* the protocol */
+        // the protocol
         std::string protocol;
 
-        /* the string command */
+        // the string command
         std::string cmd;
 
-        /* the key */
+        // the key
         std::string key;
 
-        /* arguments */
+        // arguments
         std::string args;
 
-        /* time to live */
+        // time to live
         uint32_t ttl;
 
-        /* reqeust body */
+        // reqeust body
         std::vector<uint8_t> body;
     };
 
-    /*
-     * parse request from client to Kvtp Request
-     */
-    KvtpRequest parseRequest(std::vector<uint8_t> request);
+    //
+    // decode request from client to Kvtp Request
+    //
+    KvtpRequest decodeRequest(std::vector<uint8_t> request);
 }
 
 
