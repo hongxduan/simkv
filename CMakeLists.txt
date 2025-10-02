@@ -6,10 +6,8 @@ set(CMAKE_CXX_STANDARD 23)
 add_executable(simkv main.cpp
         posix/server.cpp
         posix/server.h
-        config/cnf_parser.cpp
-        config/cnf_parser.h
-        utility/string_utility.cpp
-        utility/string_utility.h
+        util/string_util.cpp
+        util/string_util.h
         config/config.cpp
         config/config.h
         db/partition.cpp
@@ -23,6 +21,6 @@ add_executable(simkv main.cpp
         kvtp/request.h
         kvtp/response.cpp
         kvtp/response.h
-        utility/byte_util.cpp
-        utility/byte_util.h
+        util/byte_util.cpp
+        util/byte_util.h
 )

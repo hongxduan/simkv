@@ -4,7 +4,7 @@
 
 #include <fstream>
 #include "config.h"
-#include "../utility/string_utility.h"
+#include "../util/string_util.h"
 
 void Config::setHost(std::string host) {
     this->host = host;
@@ -26,8 +26,8 @@ void Config::validate(std::map<std::string, std::string> map) {
     for (auto it = map.begin(); it != map.end(); ++it) {
         if (it->first == "server") {
             auto delimiterPos = it->second.find(":");
-            auto host = trim(it->second.substr(0, delimiterPos));
-            auto port = trim(it->second.substr(delimiterPos + 1));
+            auto host = util::trim(it->second.substr(0, delimiterPos));
+            auto port = util::trim(it->second.substr(delimiterPos + 1));
 
             // validate host is IP address
 
@@ -58,8 +58,8 @@ void Config::parse() {
                 continue;
             }
             auto delimiterPos = line.find("=");
-            auto name = trim(line.substr(0, delimiterPos));
-            auto value = trim(line.substr(delimiterPos + 1));
+            auto name = util::trim(line.substr(0, delimiterPos));
+            auto value = util::trim(line.substr(delimiterPos + 1));
             map[name] = value;
         }
     } else {

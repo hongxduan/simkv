@@ -6,7 +6,7 @@
 #define SIMKV_BYTE_UTIL_H
 #include <cstdint>
 
-namespace utility {
+namespace util {
     //
     // convert little endian bytes to uint32
     //

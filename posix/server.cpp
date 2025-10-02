@@ -6,7 +6,7 @@
 #include <iostream>
 #include <vector>
 
-#include "../utility/byte_util.h"
+#include "../util/byte_util.h"
 
 #ifdef __APPLE__
 #include <sys/select.h>
@@ -172,7 +172,7 @@ std::vector<uint8_t> Server::handler(int fd, int i) {
         return response;
     }
 
-    uint32_t len = utility::le_bytes_to_uint32(len_buf);
+    uint32_t len = util::le_bytes_to_uint32(len_buf);
     std::cout << "message len:" << len << std::endl;
 
     auto bufsize = BUF_SIZE;
