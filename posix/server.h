@@ -5,7 +5,7 @@
 #ifndef SIMKV_SERVER_H
 #define SIMKV_SERVER_H
 
-
+#include <vector>
 #include "../config/config.h"
 
 #define BUF_SIZE 1024;

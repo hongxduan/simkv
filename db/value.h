@@ -6,9 +6,9 @@
 #define SIMKV_VALUE_H
 #include <vector>
 
-/*
- * Value types
- */
+//
+// Value types
+//
 enum ValueType {
     STRING,
     LIST,
@@ -17,17 +17,17 @@ enum ValueType {
     SET
 };
 
-/*
- * Value is one of the types in the union object
- */
+//
+// Value is one of the types in the union object
+//
 union ValueUnion {
-    std::vector<u_int8_t> String;
-    std::vector<std::vector<uint8_t> > List;
+    std::vector<u_int8_t> StrVal;
+    std::vector<std::vector<uint8_t> > LstVal;
 };
 
-/*
- * Value
- */
+//
+// Value
+//
 struct Value {
     ValueType type;
     ValueUnion val;

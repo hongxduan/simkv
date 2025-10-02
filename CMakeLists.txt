@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 4.0)
 project(simkv)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 
 add_executable(simkv main.cpp
         posix/server.cpp
@@ -23,4 +23,6 @@ add_executable(simkv main.cpp
         kvtp/request.h
         kvtp/response.cpp
         kvtp/response.h
+        utility/byte_util.cpp
+        utility/byte_util.h
 )

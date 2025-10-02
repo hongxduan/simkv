@@ -2,14 +2,18 @@
 // Created by HongXing on 29/9/25.
 //
 
-#ifndef SIMKV_BUCKET_H
-#define SIMKV_BUCKET_H
+#ifndef SIMKV_PARTITION_H
+#define SIMKV_PARTITION_H
+
+
 #include <map>
 #include <vector>
 
 #include "value.h"
 
-
+//
+//
+//
 struct Partition {
     // page 0-7
     std::map<std::vector<u_int8_t>, Value> Page0;
@@ -93,4 +97,4 @@ struct Partition {
 };
 
 
-#endif //SIMKV_BUCKET_H
+#endif //SIMKV_PARTITION_H

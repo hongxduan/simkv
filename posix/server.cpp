@@ -6,6 +6,8 @@
 #include <iostream>
 #include <vector>
 
+#include "../utility/byte_util.h"
+
 #ifdef __APPLE__
 #include <sys/select.h>
 #endif
@@ -157,24 +159,47 @@ void Server::startEpollServer() {
 std::vector<uint8_t> Server::handler(int fd, int i) {
     std::vector<uint8_t> response;
 
-    size_t valread;
+    //
+    // read 4 bytes, to get the message length
+    // the bytes are little endian order
+    //
+    uint8_t len_buf[4] = {0, 0, 0, 0};
+    size_t n = read(fd, len_buf, 4);
+    if (n == 0) {
+        std::cerr << "client disconnected.\n";
+        close(fd);
+        clientList.erase(clientList.begin() + i);
+        return response;
+    }
+
+    uint32_t len = utility::le_bytes_to_uint32(len_buf);
+    std::cout << "message len:" << len << std::endl;
+
     auto bufsize = BUF_SIZE;
     char buffer[bufsize + 1];
     struct sockaddr_in clientAddr;
+    std::vector<uint8_t> message; // the whole message from client
 
-    valread = read(fd, buffer, bufsize);
-    // check if client disconnected
-    if (valread == 0) {
-        std::cerr << "client disconnected.\n";
-        getpeername(fd, (struct sockaddr *) &clientAddr, (socklen_t *) &clientAddr);
-        std::cout << "client disconnected, ip is: " << inet_ntoa(clientAddr.sin_addr)
-                << "port is: " << ntohs(clientAddr.sin_port) << std::endl;
-        close(fd);
-        clientList.erase(clientList.begin() + i);
-    } else {
-        std::cout << std::strlen(buffer) << std::endl;
-        std::cout << "message from client: " << std::endl << buffer << "\n";
-    }
+    //
+    // while total read bytes less than message length, then keep reading
+    //
+    n = 0;
+    size_t total_n = 0;
+    do {
+        n = read(fd, buffer, bufsize);
+        if (n == 0) {
+            std::cerr << "client disconnected.\n";
+            getpeername(fd, (struct sockaddr *) &clientAddr, (socklen_t *) &clientAddr);
+            std::cout << "client disconnected, ip is: " << inet_ntoa(clientAddr.sin_addr)
+                    << "port is: " << ntohs(clientAddr.sin_port) << std::endl;
+            close(fd);
+            clientList.erase(clientList.begin() + i);
+        }
+        total_n += n;
+        message.insert(message.end(), buffer, buffer + n);
+    } while (total_n < len);
+
+    std::cout << "message:" << message.data() << std::endl;
 
     return response;
 }
