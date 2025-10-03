@@ -9,12 +9,12 @@
 /*
  * parse command
  */
-void parseCmd(std::vector<uint8_t> cmd);
+void parseCmd(std::vector<uint8_t> raw_req);
 
 /*
  * execute cmd and return result
  */
-std::vector<uint8_t> execute(std::vector<uint8_t> cmd);
+std::vector<uint8_t> execute(std::vector<uint8_t> raw_req);
 
 
 #endif //SIMKV_EXECUTOR_H

@@ -7,6 +7,8 @@
 
 #include <vector>
 
+#include "../inc/type.h"
+
 
 /****************** KVTP Request ****************************
 KVTP/1              ...... Protocol (Must be the first line)
@@ -17,6 +19,18 @@ TTL: 0              ...... Time To Live (Optional)
                     ...... Empty line(Header Body separator)
 Body                ...... Body
 ************************************************************/
+
+
+#define ZERO '\0'
+#define COLON ':'
+
+#define LINE_FEED '\n'
+
+#define PROTOCOL "KVTP/1"
+#define KEY_PREFIX "KEY"
+#define CMD_PREFIX "CMD"
+#define ARGS_PREFIX "ARGS"
+#define TTL_PREFIX "TTL"
 
 //
 // Key-Value Transport Protocol Header
@@ -46,7 +60,7 @@ namespace kvtp {
     //
     // decode request from client to Kvtp Request
     //
-    KvtpRequest decodeRequest(std::vector<uint8_t> request);
+    KvtpRequest decode_request(std::vector<BYTE> raw_req);
 }
 
 

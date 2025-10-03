@@ -10,7 +10,7 @@ namespace util {
     //
     // convert little endian bytes to uint32
     //
-    uint32_t le_bytes_to_uint32(uint8_t *bytes);
+    uint32_t le_bytes_to_uint32(const uint8_t *bytes);
 }
 
 

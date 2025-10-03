@@ -23,4 +23,9 @@ add_executable(simkv main.cpp
         kvtp/response.h
         util/byte_util.cpp
         util/byte_util.h
+        inc/type.h
+        db/db.cpp
+        db/db.h
+        db/key.h
+        db/key.cpp
 )

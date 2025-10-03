@@ -6,6 +6,7 @@
 #include <iostream>
 #include <vector>
 
+#include "../executor/executor.h"
 #include "../util/byte_util.h"
 
 #ifdef __APPLE__
@@ -32,12 +33,13 @@
 
 Server::Server(Config config) {
     this->config = config;
+    this->db = new Db();
 }
 
 /*
  * Multiplexing implement use select
  **/
-void Server::startSelectServer() {
+void Server::start_select_server() {
     /*
      * create server socket
      */
@@ -88,7 +90,7 @@ void Server::startSelectServer() {
         FD_ZERO(&readfds);
         FD_SET(serverFD, &readfds);
         maxfd = serverFD;
-        for (auto sd: clientList) {
+        for (auto sd: clients) {
             FD_SET(sd, &readfds);
             if (sd > maxfd) {
                 maxfd = sd;
@@ -115,7 +117,7 @@ void Server::startSelectServer() {
                 continue;
             }
             // add clientFD to list
-            clientList.push_back(clientFD);
+            clients.push_back(clientFD);
             std::cout << "new client connectd: " << std::endl;
             std::cout << "new connection, socket fd is " << clientFD << ", ip is: "
                     << inet_ntoa(clientAddr.sin_addr) << " port is: " << ntohs(clientAddr.sin_port) << std::endl;
@@ -126,8 +128,8 @@ void Server::startSelectServer() {
         auto bufsize = BUF_SIZE;
         char buffer[bufsize + 1];
 
-        for (int i = 0; i < clientList.size(); i++) {
-            sd = clientList[i];
+        for (int i = 0; i < clients.size(); i++) {
+            sd = clients[i];
             if (FD_ISSET(sd, &readfds)) {
                 handler(sd, i);
                 /*
@@ -150,7 +152,7 @@ void Server::startSelectServer() {
 }
 
 
-void Server::startEpollServer() {
+void Server::start_epoll_server() {
 }
 
 /*
@@ -168,15 +170,15 @@ std::vector<uint8_t> Server::handler(int fd, int i) {
     if (n == 0) {
         std::cerr << "client disconnected.\n";
         close(fd);
-        clientList.erase(clientList.begin() + i);
+        clients.erase(clients.begin() + i);
         return response;
     }
 
     uint32_t len = util::le_bytes_to_uint32(len_buf);
-    std::cout << "message len:" << len << std::endl;
+    //std::cout << "message len:" << len << std::endl;
 
     auto bufsize = BUF_SIZE;
-    char buffer[bufsize + 1];
+    char buffer[bufsize];
     struct sockaddr_in clientAddr;
     std::vector<uint8_t> message; // the whole message from client
 
@@ -186,6 +188,7 @@ std::vector<uint8_t> Server::handler(int fd, int i) {
     n = 0;
     size_t total_n = 0;
     do {
+        memset(buffer, 0, bufsize);
         n = read(fd, buffer, bufsize);
         if (n == 0) {
             std::cerr << "client disconnected.\n";
@@ -193,13 +196,18 @@ std::vector<uint8_t> Server::handler(int fd, int i) {
             std::cout << "client disconnected, ip is: " << inet_ntoa(clientAddr.sin_addr)
                     << "port is: " << ntohs(clientAddr.sin_port) << std::endl;
             close(fd);
-            clientList.erase(clientList.begin() + i);
+            clients.erase(clients.begin() + i);
         }
         total_n += n;
         message.insert(message.end(), buffer, buffer + n);
     } while (total_n < len);
+    //message.push_back('\0');
+    while (message[message.size() - 1] == '\n') {
+        std::cout << "\0 removed" << std::endl;
+        message.pop_back();
+    }
 
-    std::cout << "message:" << message.data() << std::endl;
+    this->db->execute(message);
 
     return response;
 }
@@ -210,10 +218,10 @@ void Server::start() {
     std::cout << "Host: " << config.getHost() << " " << "Port: " << config.getPort() << std::endl;
 
 #ifdef __APPLE__
-    startSelectServer();
+    start_select_server();
 #endif
 # ifdef __linux__
-    startEpollServer();
+    start_epoll_server();
 #endif
 
     std::cout << "Server started" << std::endl;

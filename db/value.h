@@ -4,16 +4,18 @@
 
 #ifndef SIMKV_VALUE_H
 #define SIMKV_VALUE_H
+#include <list>
 #include <vector>
+
+#include "../inc/type.h"
 
 //
 // Value types
 //
 enum ValueType {
-    STRING,
-    LIST,
+    STR,
+    LST,
     MAP,
-    HASH,
     SET
 };
 
@@ -21,16 +23,29 @@ enum ValueType {
 // Value is one of the types in the union object
 //
 union ValueUnion {
-    std::vector<u_int8_t> StrVal;
-    std::vector<std::vector<uint8_t> > LstVal;
+    //std::vector<BYTE> str;
+    //std::vector<std::vector<BYTE> > lst;
+    ValueUnion (){}
+    char* str;
+    std::list<char*> lst;
+
+    ~ValueUnion() {
+        delete str;
+        for (auto p: lst) {
+            delete p;
+        }
+    }
 };
 
 //
 // Value
 //
 struct Value {
-    ValueType type;
-    ValueUnion val;
+    ValueType typ;
+    char* str;
+    std::list<char*> lst;
+    //ValueUnion val;
+
 };
 
 
