@@ -10,16 +10,20 @@
 #include "../inc/type.h"
 
 
-/****************** KVTP Request ****************************
-KVTP/1              ...... Protocol (Must be the first line)
-CMD: GET|SET        ...... Command
-KEY: k1|users[1]    ...... Key
-ARGS: EX|NX         ...... Arguments (Optional)
-TTL: 0              ...... Time To Live (Optional)
-                    ...... Empty line(Header Body separator)
-Body                ...... Body
-************************************************************/
+/****************** KVTP Request ******************************
+ * KVTP/1              ...... Protocol (Must be the first line)
+ * CMD: GET|SET        ...... Command
+ * KEY: k1|users[1]    ...... Key
+ * ARGS: EX|NX         ...... Arguments (Optional)
+ * TTL: 0              ...... Time To Live (Optional)
+ *                     ...... Empty line(Header Body separator)
+ * Body                ...... 00000000 00000000keyval
+***************************************************************/
 
+/*
+ * Of body, the first 2 bytes are length of key, continue with key and value bytes
+ *
+ */
 
 #define ZERO '\0'
 #define COLON ':'
@@ -54,7 +58,7 @@ namespace kvtp {
         uint32_t ttl;
 
         // reqeust body
-        std::vector<uint8_t> body;
+        std::vector<uint8_t> val;
     };
 
     //

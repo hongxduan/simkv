@@ -42,8 +42,8 @@ union ValueUnion {
 //
 struct Value {
     ValueType typ;
-    char* str;
-    std::list<char*> lst;
+    std::string str;
+    std::list<std::vector<BYTE>> lst;
     //ValueUnion val;
 
 };

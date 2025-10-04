@@ -52,9 +52,9 @@ std::vector<BYTE> Db::get(kvtp::KvtpRequest kvtp_req) {
 std::vector<BYTE> Db::set(kvtp::KvtpRequest kvtp_req) {
     std::vector<BYTE> result;
 
-    Value value =  Value();
+    Value value = Value();
     value.typ = ValueType::STR;
-    value.str = (char*)"abc";
+    value.str = std::string(kvtp_req.val.begin(), kvtp_req.val.end());
     this->page0[kvtp_req.key] = value;
 
     return result;

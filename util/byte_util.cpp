@@ -18,3 +18,16 @@ uint32_t util::le_bytes_to_uint32(const uint8_t *bytes) {
     }
     return result;
 }
+
+
+uint16_t util::le_bytes_to_uint16(const uint8_t *bytes) {
+    // convert bytes to int first
+    const uint16_t result = bytes[0] << 8 | bytes[1];
+    //std::memcpy(&reuslt, bytes, sizeof(result));
+
+    // if the System is Big Endian, then need swap bytes
+    if constexpr (std::endian::big == std::endian::native) {
+        return std::byteswap(result);
+    }
+    return result;
+}
