@@ -5,3 +5,5 @@
 
 # for test data folder
 /data*
+
+/.idea

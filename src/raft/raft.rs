@@ -6,17 +6,17 @@
 use std::{
     collections::HashMap,
     fs::File,
-    io::{Error, Read, Write},
+    io::{Read, Write},
     path::{MAIN_SEPARATOR, Path},
     sync::{Arc, Mutex, RwLock},
     time::{SystemTime, UNIX_EPOCH},
 };
 
-use tokio::{net::TcpListener, sync::mpsc::UnboundedReceiver, time::Instant};
+use tokio::{net::TcpListener, time::Instant};
 
 use crate::{
     raft::handler::Handler,
-    server::config::{Config, GLOBAL_CONFIG},
+    server::config::GLOBAL_CONFIG,
     utils::strutil,
 };
 use serde::{Deserialize, Serialize};
@@ -31,7 +31,7 @@ const NODE_FILE_NAME: &str = "__node__.json";
 ///
 /// Node info
 ///
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Node {
     pub id: String,
     pub host: String,
@@ -41,13 +41,21 @@ pub struct Node {
 ///
 /// On which node the bucket stored
 ///
+/// primary: the primary node id, only primary can write
+/// replicas:  the replicas, 1 replica for now
+/// 
 pub struct BucketNode {
-    primary: String,       // the primary node id, only primary can write
-    replicas: Vec<String>, // the replicas, 1 replica for now
+    primary: String,
+    replicas: Vec<String>,
 }
 
 ///
 /// Raft data that need sync by leader to all followers
+/// 
+/// nodes: all node in the cluster
+/// ts: epoch seconds when the Raft data was updated, 
+///     this field can help indicate whether the data on
+///     followers is outdated or not
 ///
 #[derive(Debug, Serialize, Deserialize)]
 pub struct RaftData {
@@ -58,7 +66,7 @@ pub struct RaftData {
 }
 
 ///
-///
+/// Global shared Raft Data
 ///
 #[derive(Debug, Serialize, Deserialize)]
 pub struct GlobalRaftData {
@@ -67,10 +75,15 @@ pub struct GlobalRaftData {
 
 ///
 /// Raft state at runtime
-///
+/// 
+/// lnode_id: the leader node id
+/// role: raft role, Leader or Follower
+/// updated: When was last heartbeat received from Leader
+/// 
 pub struct RaftState {
+    pub lnode_id: String,
     pub role: RaftRole,
-    pub last_hb: Instant, // Last heartbeat instant received from Leader
+    pub updated: Instant,
 }
 
 #[derive(Debug, Clone)]
@@ -102,8 +115,9 @@ lazy_static! {
         port: 0,
     });
     pub static ref GLOBAL_RAFT_STATE: RwLock<RaftState> = RwLock::new(RaftState {
+        lnode_id: String::from(""),
         role: RaftRole::Follower,
-        last_hb: Instant::now()
+        updated: Instant::now()
     });
 
     pub static ref GLOBAL_RAFT_DATA: RwLock<GlobalRaftData> = RwLock::new(GlobalRaftData { raft_data: RaftData{
@@ -342,14 +356,18 @@ impl Listener {
 }
 
 impl RaftState {
-    pub fn role_updated(&self, role: RaftRole) {
+    pub async fn role_updated(&self, role: RaftRole) {
         match role {
             RaftRole::Leader => {
-                tokio::spawn(async {
-                    Heartbeat::send().await;
-                });
+                    // Start to send heartbeat to followers
+                    // Triggered when:
+                    //  1. Cluster init
+                    //  2. Voted as Raft Leader
+                    let mut heartbeat = Heartbeat::new();
+                    heartbeat.send().await;
+                },
+                RaftRole::Follower => {}
             }
-            RaftRole::Follower => {}
         }
-    }
+
 }

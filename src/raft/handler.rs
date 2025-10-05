@@ -6,15 +6,14 @@
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::TcpStream,
-    time::Instant,
 };
 
 use crate::raft::raft::Raft;
 
 use super::{heartbeat::Heartbeat, vote::Vote};
 
-const RAFT_VOTE: u8 = 1;
-const RAFT_HEARTBEAT: u8 = 2;
+const RAFT_HEARTBEAT: u8 = 1;
+const RAFT_VOTE: u8 = 2;
 
 pub struct Handler {
     pub socket: TcpStream,
@@ -63,7 +62,7 @@ impl Handler {
 
             //let mut raft = self.raft.lock().unwrap();
             //Raft::receive(&buf);
-            self.receive(&buf, &self.raft);
+            self.receive(&buf);
 
             if let Err(e) = self.socket.write_all(&buf[0..n]).await {
                 eprintln!("failed to write to socket; err = {:?}", e);
@@ -77,10 +76,7 @@ impl Handler {
     ///
     /// 1. Convert first byte to u8
     ///
-    pub fn receive(&self, buf: &Vec<u8>, raft: &Raft) {
-        let mut state = raft.shared.state.lock().unwrap();
-        state.last_hb = Instant::now();
-
+    pub fn receive(&self, buf: &Vec<u8>) {
         let icmd = u8::from_be_bytes([buf[0]]);
         match icmd {
             RAFT_VOTE => {

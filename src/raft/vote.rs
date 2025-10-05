@@ -8,7 +8,7 @@ use std::time::Duration;
 
 use tokio::time::Instant;
 
-use super::raft::Raft;
+use super::raft::{Raft, RaftRole, RaftState, GLOBAL_RAFT_STATE};
 
 const VOTE_COOL_DOWN: i64 = 500;
 
@@ -61,5 +61,13 @@ impl Vote {
 
     fn do_vote() {
         //println!("do_vote");
+
+        // If voted as Leader, then update status
+        /* 
+        let mut raft_state_lock = GLOBAL_RAFT_STATE.write().unwrap();
+        raft_state_lock.role = RaftRole::Leader;
+        let _ = raft_state_lock.role_updated(RaftRole::Leader);
+        drop(raft_state_lock);
+        */
     }
 }
