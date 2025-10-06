@@ -22,3 +22,19 @@ std::string util::trim_right(const std::string &str) {
 std::string util::trim(const std::string &str) {
     return trim_right(trim_left(str));
 }
+
+
+uint16_t util::crc16(const std::string str, uint16_t size) {
+    uint16_t crc = 0;
+    auto* data = str.c_str();
+    while (size--) {
+        crc ^= *data++ << 8;
+        for (int i = 0; i < 8; ++i) {
+            if (crc & 0x8000)
+                crc = (crc << 1) ^ CRC16_POLY;
+            else
+                crc <<= 1;
+        }
+    }
+    return crc;
+}
