@@ -21,19 +21,18 @@ enum ValueType {
 
 //
 // Value is one of the types in the union object
+// have problem???
 //
 union ValueUnion {
     //std::vector<BYTE> str;
     //std::vector<std::vector<BYTE> > lst;
-    ValueUnion (){}
-    char* str;
-    std::list<char*> lst;
+    ValueUnion() {
+    }
+
+    std::string str;
+    std::list<std::vector<BYTE> > lst;
 
     ~ValueUnion() {
-        delete str;
-        for (auto p: lst) {
-            delete p;
-        }
     }
 };
 
@@ -42,10 +41,9 @@ union ValueUnion {
 //
 struct Value {
     ValueType typ;
-    std::string str;
-    std::list<std::vector<BYTE>> lst;
+    std::list<std::vector<BYTE> > lst;
+    void *val;
     //ValueUnion val;
-
 };
 
 

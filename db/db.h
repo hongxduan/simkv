@@ -18,13 +18,18 @@
 #define DEL "DEL"
 #define KEY "KEY"
 
+#define PAGE_NUM 64;
+
 
 class Db {
 public:
+    Db();
     std::vector<BYTE> execute(std::vector<BYTE> raw_req);
 
 private:
-    std::map<std::string, Value> page0;
+    // pages in a vector
+    std::vector<std::map<std::string, Value>> pages;
+
     std::vector<BYTE> get(kvtp::KvtpRequest request);
 
     std::vector<BYTE> set(kvtp::KvtpRequest request);

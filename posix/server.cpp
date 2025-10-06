@@ -201,7 +201,7 @@ std::vector<uint8_t> Server::handler(int fd, int i) {
         total_n += n;
         message.insert(message.end(), buffer, buffer + n);
     } while (total_n < len);
-    //message.push_back('\0');
+
     while (message[message.size() - 1] == '\n') {
         std::cout << "\0 removed" << std::endl;
         message.pop_back();

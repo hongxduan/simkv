@@ -10,8 +10,6 @@ add_executable(simkv main.cpp
         util/string_util.h
         config/config.cpp
         config/config.h
-        db/partition.cpp
-        db/partition.h
         db/value.cpp
         db/value.h
         executor/executor.cpp
@@ -28,4 +26,5 @@ add_executable(simkv main.cpp
         db/db.h
         db/key.h
         db/key.cpp
+        kvtp/kvtp.h
 )

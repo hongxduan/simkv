@@ -8,6 +8,16 @@
 
 #include "key.h"
 
+/****************************
+ * Db constructor implement
+ ****************************/
+Db::Db() {
+    uint page_num = PAGE_NUM;
+    for (auto i=0 ; i < page_num; i++) {
+        pages.push_back(std::map<std::string, Value>());
+    }
+}
+
 std::vector<BYTE> Db::execute(std::vector<BYTE> raw_req) {
     std::vector<BYTE> result;
 
@@ -39,9 +49,10 @@ std::vector<BYTE> Db::execute(std::vector<BYTE> raw_req) {
 std::vector<BYTE> Db::get(kvtp::KvtpRequest kvtp_req) {
     std::vector<BYTE> result;
 
-    auto val = this->page0[kvtp_req.key];
+    //auto value = this->page0[kvtp_req.key];
+    auto value = this->pages[0][kvtp_req.key];
 
-    std::cout << val.str << std::endl;
+    std::cout << *static_cast<std::string *>(value.val) << std::endl;
 
     return result;
 }
@@ -52,10 +63,14 @@ std::vector<BYTE> Db::get(kvtp::KvtpRequest kvtp_req) {
 std::vector<BYTE> Db::set(kvtp::KvtpRequest kvtp_req) {
     std::vector<BYTE> result;
 
+    std::string *val = new std::string();
     Value value = Value();
     value.typ = ValueType::STR;
-    value.str = std::string(kvtp_req.val.begin(), kvtp_req.val.end());
-    this->page0[kvtp_req.key] = value;
+    //value.str = std::string(kvtp_req.val.begin(), kvtp_req.val.end());
+    val->assign(kvtp_req.val.begin(), kvtp_req.val.end());
+    value.val = val;
+    //this->page0[kvtp_req.key] = value;
+    this->pages[0][kvtp_req.key] = value;
 
     return result;
 }

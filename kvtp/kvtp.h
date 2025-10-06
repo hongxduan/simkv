@@ -5,4 +5,8 @@
 #ifndef SIMKV_KVTP_H
 #define SIMKV_KVTP_H
 
+#define PROTOCOL_V1 "KVTP/1"
+#define SPACE_CHAR ' '
+
+
 #endif //SIMKV_KVTP_H
