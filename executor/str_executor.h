@@ -40,7 +40,7 @@ protected:
         auto value = db->get(index, kvtp_req.key);
         if (value.val == nullptr) {
             std::cout << "null" << std::endl;
-            result = kvtp::encode_str_response(key_not_found_rslt);
+            result = kvtp::encode_err_response(key_not_found_rslt);
             return result;
         }
 

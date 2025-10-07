@@ -217,6 +217,7 @@ std::vector<uint8_t> Server::handler(int fd, int i) {
         // execute non-db commands
     }
 
+    send(fd, response.data(), response.size(), 0);
     return response;
 }
 

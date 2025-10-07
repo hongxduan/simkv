@@ -7,7 +7,12 @@
 
 #define PROTOCOL_V1 "KVTP/1"
 #define SPACE_CHAR ' '
+#define SPACE_STR " "
 
 #define LINE_FEED '\n'
+
+
+#define RESP_STATUS_OK "OK"
+#define RESP_STATUS_ERR "ERR"
 
 #endif //SIMKV_KVTP_H

@@ -10,10 +10,10 @@
 
 
 namespace kvtp {
-
     const std::vector<BYTE> resp_type_I = {'I'};
     const std::vector<BYTE> resp_type_S = {'S'};
     const std::vector<BYTE> resp_type_D = {'D'};
+
 
     //
     // encode KVTP response
@@ -34,6 +34,11 @@ namespace kvtp {
     // build ok header, including protocol, data type, and separtor
     //
     void append_ok_header(std::vector<BYTE> &response, std::vector<BYTE> resp_type);
+
+    //
+    // encode error response
+    //
+    std::vector<BYTE> encode_err_response(std::string val);
 
     //
     // prepend 4 bytes reponse length
