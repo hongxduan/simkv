@@ -72,7 +72,7 @@ kvtp::KvtpRequest kvtp::decode_request(std::vector<BYTE> raw_req) {
 
     /************************************************
      * decode body
-     * body consit of 2 bytes of key lenght,
+     * body consits of 2 bytes of key lenght,
      * followed by key bytes, and then body bytes
      ***********************************************/
     std::vector<uint8_t> body_bytes;
@@ -80,7 +80,7 @@ kvtp::KvtpRequest kvtp::decode_request(std::vector<BYTE> raw_req) {
 
     // decode key_size, i.e. total bytes count of key
     BYTE key_size_bytes[KEY_WIDTH] = {body_bytes[0], body_bytes[1]};
-    uint64_t key_size = util::le_bytes_to_uint16(key_size_bytes);
+    uint16_t key_size = util::bytes_to_uint16(key_size_bytes);
 
     // key string
     std::string key = std::string(body_bytes.begin() + KEY_WIDTH, body_bytes.begin() + KEY_WIDTH + key_size);
