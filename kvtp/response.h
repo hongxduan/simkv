@@ -10,6 +10,11 @@
 
 
 namespace kvtp {
+
+    const std::vector<BYTE> resp_type_I = {'I'};
+    const std::vector<BYTE> resp_type_S = {'S'};
+    const std::vector<BYTE> resp_type_D = {'D'};
+
     //
     // encode KVTP response
     //
@@ -23,9 +28,17 @@ namespace kvtp {
     //
     // encode string to kvtp response
     //
-    std::vector<BYTE> encode_str_response();
+    std::vector<BYTE> encode_str_response(std::string val);
 
-    void append_ok(std::vector<BYTE> &response);
+    //
+    // build ok header, including protocol, data type, and separtor
+    //
+    void append_ok_header(std::vector<BYTE> &response, std::vector<BYTE> resp_type);
+
+    //
+    // prepend 4 bytes reponse length
+    //
+    void prepend_len_bytes(std::vector<BYTE> &response);
 }
 
 #endif //SIMKV_RESPONSE_H

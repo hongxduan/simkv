@@ -14,10 +14,7 @@ namespace util {
 
     std::string trim(const std::string &str);
 
-    //
-    // CRC16 hash
-    //
-    uint16_t crc16(const std::string str, uint16_t size);
+
 }
 
 #endif //SIMKV_STRING_UTILITY_H

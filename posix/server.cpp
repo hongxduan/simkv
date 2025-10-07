@@ -29,11 +29,13 @@
 
 #include "server.h"
 #include "../config/config.h"
+#include "../executor/command.h"
 
 
 Server::Server(Config config) {
     this->config = config;
     this->db = new Db();
+    this->executor = new Executor();
 }
 
 /*
@@ -207,7 +209,13 @@ std::vector<uint8_t> Server::handler(int fd, int i) {
         message.pop_back();
     }
 
-    this->db->execute(message);
+    // decode raw req to kvtp req
+    auto kvtp_req = kvtp::decode_request(message);
+    if (kvtp_req.cmd == cmd::GET || kvtp_req.cmd == cmd::SET || kvtp_req.cmd == cmd::DEL || kvtp_req.cmd == cmd::KEY) {
+        response = executor->execute_db(kvtp_req, db);
+    } else {
+        // execute non-db commands
+    }
 
     return response;
 }

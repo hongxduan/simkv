@@ -7,6 +7,20 @@
 
 #include <iterator>
 
+void util::int32_to_bytes(int32_t value, uint8_t bytes[4]) {
+    bytes[0] = (value >> 24) & 0xFF;
+    bytes[1] = (value >> 16) & 0xFF;
+    bytes[2] = (value >> 8) & 0xFF;
+    bytes[3] = value & 0xFF;
+}
+
+void util::uint32_to_bytes(uint32_t value, uint8_t bytes[4]) {
+    bytes[0] = (value >> 24) & 0xFF;
+    bytes[1] = (value >> 16) & 0xFF;
+    bytes[2] = (value >> 8) & 0xFF;
+    bytes[3] = value & 0xFF;
+}
+
 int32_t util::bytes_to_int32(const uint8_t *bytes) {
     // convert bytes to int first
     const uint32_t result = bytes[0] << 24 | bytes[1] << 16 | bytes[2] << 8 | bytes[3];

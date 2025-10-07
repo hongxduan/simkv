@@ -27,4 +27,11 @@ add_executable(simkv main.cpp
         db/key.h
         db/key.cpp
         kvtp/kvtp.h
+        executor/str_executor.cpp
+        executor/str_executor.h
+        executor/lst_executor.cpp
+        executor/lst_executor.h
+        executor/db_executor.h
+        util/crc_util.cpp
+        util/crc_util.h
 )

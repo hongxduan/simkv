@@ -8,6 +8,7 @@
 #include <vector>
 #include "../config/config.h"
 #include "../db/db.h"
+#include "../executor/executor.h"
 
 #define BUF_SIZE 1024;
 #define MAX_CONNECTIONS 1000;
@@ -21,6 +22,7 @@ class Server {
 
     private:
     Db *db;
+    Executor *executor;
     Config config;
     std::vector<int> clients; // select: for storing all the client fd
     void start_select_server();

@@ -8,14 +8,21 @@
 #include "../inc/type.h"
 #include "../kvtp/request.h"
 
-std::vector<BYTE> execute(std::vector<BYTE> raw_req) {
+std::vector<BYTE> Executor::execute_db(kvtp::KvtpRequest kvtp_req, Db* db) {
     std::vector<BYTE> result;
 
-    std::cout << "message:\n" << raw_req.data() << std::endl;
-    // decode raw req to kvtp req
-    auto kvtp_req = kvtp::decode_request(raw_req);
+    // parse key
+    KeyInfo key_info = parse_key(kvtp_req.key);
 
-    //
+    if (key_info.typ == ValueType::STR) {
+        result = this->str_executor.execute(kvtp_req, key_info, db);
+    }else if (key_info.typ == ValueType::LST) {
+        result = this->lst_executor.execute(kvtp_req, key_info, db);
+    }else if (key_info.typ == ValueType::MAP) {
+
+    }else if (key_info.typ == ValueType::SET) {
+
+    }
 
     return result;
 }

@@ -6,15 +6,22 @@
 #define SIMKV_EXECUTOR_H
 #include <vector>
 
-/*
- * parse command
- */
-void parseCmd(std::vector<uint8_t> raw_req);
+#include "lst_executor.h"
+#include "str_executor.h"
+#include "../db/db.h"
+#include "../inc/type.h"
+#include "../kvtp/request.h"
 
-/*
- * execute cmd and return result
- */
-std::vector<uint8_t> execute(std::vector<uint8_t> raw_req);
+class Executor {
+public:
+    //
+    // execute cmd and return result
+    //
+    std::vector<BYTE> execute_db(kvtp::KvtpRequest kvtp_req, Db *db);
 
+private:
+    StrExecutor str_executor;
+    LstExecutor lst_executor;
+};
 
 #endif //SIMKV_EXECUTOR_H
