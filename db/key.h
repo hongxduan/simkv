@@ -16,7 +16,7 @@
  set users[0] xxx     ... left push
  set users[-1] xxx    ... right push
  set users[5]  xxx    ... insert at index 5
- set users[$5] xxx    ... replace value at index 5
+ set users[&5] xxx    ... replace value at index 5
  get users[0]         ... get the first
  get users[-1]        ... get the last
  get users[#]         ... get len

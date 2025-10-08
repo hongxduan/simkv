@@ -34,4 +34,5 @@ add_executable(simkv main.cpp
         executor/db_executor.h
         util/crc_util.cpp
         util/crc_util.h
+        executor/exec_message.h
 )

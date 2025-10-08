@@ -9,8 +9,10 @@
 
 #include "command.h"
 #include "db_executor.h"
-#include "../kvtp/request.h"
+#include "exec_message.h"
 #include "../db/db.h"
+#include "../kvtp/request.h"
+#include "../kvtp/response.h"
 
 
 class LstExecutor : public DbExecutor {
@@ -24,7 +26,7 @@ public:
             return del(kvtp_req, db);
         } else {
             // return error command
-            return get(kvtp_req, db);
+            return kvtp::encode_err_response(execmsg::INVALID_CMD);
         }
     }
 

@@ -213,8 +213,10 @@ std::vector<uint8_t> Server::handler(int fd, int i) {
     auto kvtp_req = kvtp::decode_request(message);
     if (kvtp_req.cmd == cmd::GET || kvtp_req.cmd == cmd::SET || kvtp_req.cmd == cmd::DEL || kvtp_req.cmd == cmd::KEY) {
         response = executor->execute_db(kvtp_req, db);
-    } else {
+    } else if (kvtp_req.cmd == cmd::CLUSTER){
         // execute non-db commands
+    }else {
+        response = kvtp::encode_err_response(execmsg::INVALID_CMD);
     }
 
     send(fd, response.data(), response.size(), 0);
