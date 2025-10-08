@@ -13,6 +13,7 @@
 #include "../kvtp/request.h"
 #include "../kvtp/response.h"
 #include "../util/crc_util.h"
+#include "../util/time_util.h"
 
 class StrExecutor : public DbExecutor {
 public:
@@ -33,20 +34,17 @@ protected:
     std::vector<BYTE> get(kvtp::KvtpRequest kvtp_req, Db *db) {
         std::vector<BYTE> result;
 
-        // calc page index
-        auto hash = util::crc16(kvtp_req.key);
-        auto index = hash % PAGE_NUM;
-
-        std::cout << "hash:" << hash << std::endl;
-        auto value = db->get(index, kvtp_req.key);
-        if (value.val == nullptr) {
+        //
+        auto page = db->get_page(kvtp_req.key);
+        auto value = (*page)[kvtp_req.key];
+        if (value == nullptr) {
             std::cout << "null" << std::endl;
             result = kvtp::encode_err_response(execmsg::KEY_NOT_FOUND);
             return result;
         }
 
         // to string
-        std::string str_val = *static_cast<std::string *>(value.val);
+        std::string str_val = *static_cast<std::string *>(value->val);
 
         // encode kvtp response
         result = kvtp::encode_str_response(str_val);
@@ -58,21 +56,48 @@ protected:
     std::vector<BYTE> set(kvtp::KvtpRequest kvtp_req, Db *db) {
         std::vector<BYTE> result;
 
+        // get page
+        auto page = db->get_page(kvtp_req.key);
+
+        // get old
+        auto old = (*page)[kvtp_req.key];
+
+        // create new Valute and set val
         std::string *val = new std::string();
-        Value value = Value();
-        value.typ = ValueType::STR;
+        auto value = new Value();
+        value->typ = ValueType::STR;
         //value.str = std::string(kvtp_req.val.begin(), kvtp_req.val.end());
         val->assign(kvtp_req.val.begin(), kvtp_req.val.end());
-        value.val = val;
+        value->val = val;
 
-        // calc page index
-        auto hash = util::crc16(kvtp_req.key);
-        auto index = hash % PAGE_NUM;
-        std::cout << index << std::endl;
-        std::cout << kvtp_req.key << " " << *(std::string *) value.val << std::endl;
+        // handle ttl and expiration
+        // todo: make set_ttl a method
+        std::cout << "raw ttl:" << kvtp_req.ttl << std::endl;
+        if (kvtp_req.ttl > 0) {
+            auto ttl = util::ms_now();
+            ttl = ttl + kvtp_req.ttl * 1000; // to mills
+            ttl = util::ms_to_based(ttl);
+            value->ttl = ttl; // to based
+            std::cout << "based ttl: " << ttl << std::endl;
+
+            // delete old expiration
+            if (old != nullptr) {
+                db->del_expiration(kvtp_req.key, old->ttl);
+            }
+
+            // set new expiration
+            db->set_expiration(kvtp_req.key, ttl);
+
+            // notify purge expiration thread
+            std::lock_guard<std::mutex> unlock(expiration_mutex);
+            expiration_cv.notify_one();
+        }
+
         // set db
-        //db->get_pages()[index][kvtp_req.key] = value;
-        db->set(index, kvtp_req.key, value);
+        //db->get_page[index][kvtp_req.key] = value;
+        //db->set(index, kvtp_req.key, value);
+
+        (*page)[kvtp_req.key] = value;
 
         // encode kvtp response
         result = kvtp::encode_i32_response(1);

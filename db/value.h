@@ -46,6 +46,11 @@ struct Value {
     // lst: *list<std::vector<BYTE>>
     //
     void *val;
+
+    ///
+    /// store based ms
+    ///
+    int64_t ttl = -1;
     //ValueUnion val;
 };
 

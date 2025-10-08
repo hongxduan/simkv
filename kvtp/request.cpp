@@ -6,6 +6,7 @@
 #include <sstream>
 #include "request.h"
 
+#include "response.h"
 #include "../util/byte_util.h"
 
 #define KEY_WIDTH 2 // bytes of key
@@ -81,6 +82,12 @@ kvtp::KvtpRequest kvtp::decode_request(std::vector<BYTE> raw_req) {
     // decode key_size, i.e. total bytes count of key
     BYTE key_size_bytes[KEY_WIDTH] = {body_bytes[0], body_bytes[1]};
     uint16_t key_size = util::bytes_to_uint16(key_size_bytes);
+
+    // kvtp format error
+    if (key_size>=body_bytes.size()) {
+        kvtp_req.error = true;
+        return kvtp_req;
+    }
 
     // key string
     std::string key = std::string(body_bytes.begin() + KEY_WIDTH, body_bytes.begin() + KEY_WIDTH + key_size);

@@ -12,6 +12,8 @@ namespace execmsg {
     const std::string ERR = "ERR";
     const std::string KEY_NOT_FOUND = "KEY_NOT_FOUND";
     const std::string INVALID_CMD = "INVALID_CMD";
+
+    const std::string KVTP_FMT_ERR = "KVTP_FMT_ERR";
 }
 
 #endif //SIMKV_EXEC_MESSAGE_H

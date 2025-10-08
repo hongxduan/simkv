@@ -59,6 +59,8 @@ namespace kvtp {
 
         // reqeust body
         std::vector<uint8_t> val;
+
+        bool error;
     };
 
     //

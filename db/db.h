@@ -16,11 +16,14 @@
 #include "../kvtp/request.h"
 
 #define PAGE_NUM 64;
-#define MILLS_BASE 1759894044607;
+
 
 struct Expiration {
     std::string key;
-    uint64_t ms;
+
+    ///
+    /// store based mills
+    int64_t ms;
 
     // override < operatior
     bool operator<(const Expiration &other) const {
@@ -41,27 +44,54 @@ public:
     //
     // set value to pages[index]
     //
-    void set(uint16_t index, std::string key, Value value);
+    void set(uint16_t index, std::string key, Value* value);
 
     //
     // get value from pages[index]
     //
-    Value get(uint16_t index, std::string key);
+    Value* get(uint16_t index, std::string key);
+
+    /// get page via index
+    /// @param key
+    /// @return
+    std::map<std::string, Value*> *get_page(std::string key);
+
+    /// set expiration
+    /// @param key
+    /// @param ms
+    void set_expiration(std::string key, int64_t ms);
+
+    /// delete expiration
+    /// @param key
+    /// @param ms
+    void del_expiration(std::string key, int64_t ms);
+
+    std::set<Expiration>* get_expirations();
+
+    ///
+    /// @return
+    ///     next expiration
+    Expiration next_expiration();
 
 private:
     // pages in a vector
-    std::vector<std::map<std::string, Value> > pages;
+    std::vector<std::map<std::string, Value*> > pages;
 
     std::set<Expiration> expirations;
 };
 
-static bool expiration_notified;
 static std::mutex expiration_mutex;
 static std::condition_variable expiration_cv;
-//
-// purge expired keys
-//
-static void purge_expired(Db* db);
 
+/// task runs on a dedicated thread to purge expired keys
+/// @param db
+static void purge_expired_task(Db *db);
+
+/// do purge expired keys
+/// @param db
+/// @return
+///     the first based ms greater than now, i.e. the one on the top of tree
+///     the purge task will sleep base on this return value
+static int64_t purge_expired_keys(Db *db);
 
 #endif //SIMKV_DB_H
