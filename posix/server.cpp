@@ -212,13 +212,17 @@ std::vector<uint8_t> Server::handler(int fd, int i) {
     // decode raw req to kvtp req
     auto kvtp_req = kvtp::decode_request(message);
     if (kvtp_req.error) {
-        kvtp::encode_err_response(execmsg::KVTP_FMT_ERR);
+        if (kvtp_req.error_msg != "") {
+            kvtp::encode_err_response(kvtp_req.error_msg);
+        } else {
+            kvtp::encode_err_response(execmsg::KVTP_FMT_ERR);
+        }
     }
     if (kvtp_req.cmd == cmd::GET || kvtp_req.cmd == cmd::SET || kvtp_req.cmd == cmd::DEL || kvtp_req.cmd == cmd::KEY) {
         response = executor->execute_db(kvtp_req, db);
-    } else if (kvtp_req.cmd == cmd::CLUSTER){
+    } else if (kvtp_req.cmd == cmd::CLUSTER) {
         // execute non-db commands
-    }else {
+    } else {
         response = kvtp::encode_err_response(execmsg::INVALID_CMD);
     }
 

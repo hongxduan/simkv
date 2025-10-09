@@ -72,13 +72,12 @@ protected:
 
         // handle ttl and expiration
         // todo: make set_ttl a method
-        std::cout << "raw ttl:" << kvtp_req.ttl << std::endl;
+
         if (kvtp_req.ttl > 0) {
             auto ttl = util::ms_now();
             ttl = ttl + kvtp_req.ttl * 1000; // to mills
             ttl = util::ms_to_based(ttl);
             value->ttl = ttl; // to based
-            std::cout << "based ttl: " << ttl << std::endl;
 
             // delete old expiration
             if (old != nullptr) {
@@ -91,6 +90,12 @@ protected:
             // notify purge expiration thread
             std::lock_guard<std::mutex> unlock(expiration_mutex);
             expiration_cv.notify_one();
+        } else {
+            if (kvtp_req.ttl == -1) {
+                value->ttl = -1;
+            } else {
+                //
+            }
         }
 
         // set db

@@ -55,12 +55,14 @@ namespace kvtp {
         std::string args;
 
         // time to live
-        uint32_t ttl;
+        int64_t ttl;
 
         // reqeust body
         std::vector<uint8_t> val;
 
         bool error;
+
+        std::string error_msg;
     };
 
     //

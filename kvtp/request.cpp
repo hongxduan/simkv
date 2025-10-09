@@ -13,12 +13,12 @@
 
 kvtp::KvtpRequest kvtp::decode_request(std::vector<BYTE> raw_req) {
     // set initial value is important, or read dirty memroy
-    kvtp::KvtpRequest kvtp_req={
-         "",
-         "",
+    kvtp::KvtpRequest kvtp_req = {
         "",
         "",
-        0,
+        "",
+        "",
+        -1, //
         {},
         false
     };
@@ -45,6 +45,7 @@ kvtp::KvtpRequest kvtp::decode_request(std::vector<BYTE> raw_req) {
             if (tmp == "") {
                 break;
             }
+            // std::cout << tmp << std::endl;
 
             std::stringstream ss_line(tmp);
             std::string part;
@@ -72,9 +73,18 @@ kvtp::KvtpRequest kvtp::decode_request(std::vector<BYTE> raw_req) {
             } else if (head_key == ARGS_PREFIX) {
                 kvtp_req.args = head_val;
             } else if (head_key == TTL_PREFIX) {
-                int32_t ttl = atol(head_val.c_str());
-                // todo: what if ttl = 0?
-                kvtp_req.ttl = ttl;
+                try {
+                    int64_t ttl = std::stoll(head_val.c_str(), NULL, 10);
+                    // validate ttl from client, 0 and negative are not allowed
+                    if (ttl <= 0) {
+                        kvtp_req.error = true;
+                        kvtp_req.error_msg = "INVALID_TTL";
+                    }
+                    kvtp_req.ttl = ttl;
+                } catch (std::invalid_argument &e) {
+                    kvtp_req.error = true;
+                    kvtp_req.error_msg = "INVALID_TTL";
+                }
             }
         }
         line_num++;
@@ -93,7 +103,7 @@ kvtp::KvtpRequest kvtp::decode_request(std::vector<BYTE> raw_req) {
     uint16_t key_size = util::bytes_to_uint16(key_size_bytes);
 
     // kvtp format error
-    if (key_size>=body_bytes.size()) {
+    if (key_size >= body_bytes.size()) {
         kvtp_req.error = true;
         return kvtp_req;
     }
