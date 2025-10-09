@@ -12,7 +12,16 @@
 #define KEY_WIDTH 2 // bytes of key
 
 kvtp::KvtpRequest kvtp::decode_request(std::vector<BYTE> raw_req) {
-    kvtp::KvtpRequest kvtp_req;
+    // set initial value is important, or read dirty memroy
+    kvtp::KvtpRequest kvtp_req={
+         "",
+         "",
+        "",
+        "",
+        0,
+        {},
+        false
+    };
 
     std::string raw_str = std::string(raw_req.begin(), raw_req.end());
     std::stringstream stream(raw_str);
@@ -20,9 +29,9 @@ kvtp::KvtpRequest kvtp::decode_request(std::vector<BYTE> raw_req) {
     size_t line_num = 0;
     size_t header_size = 0;
 
-    /****************************************
-     * decode header
-     ***************************************/
+    //
+    // decode header
+    //
     while (std::getline(stream, tmp, LINE_FEED)) {
         // accumulate header size
         header_size += tmp.size();
@@ -71,11 +80,11 @@ kvtp::KvtpRequest kvtp::decode_request(std::vector<BYTE> raw_req) {
         line_num++;
     }
 
-    /************************************************
-     * decode body
-     * body consits of 2 bytes of key lenght,
-     * followed by key bytes, and then body bytes
-     ***********************************************/
+    //
+    // decode body
+    // body consits of 2 bytes of key lenght,
+    // followed by key bytes, and then body bytes
+    //
     std::vector<uint8_t> body_bytes;
     body_bytes.assign(raw_req.begin() + header_size, raw_req.end());
 
