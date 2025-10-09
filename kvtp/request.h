@@ -25,17 +25,6 @@
  *
  */
 
-#define ZERO '\0'
-#define COLON ':'
-
-#define LINE_FEED '\n'
-
-#define PROTOCOL "KVTP/1"
-#define KEY_PREFIX "KEY"
-#define CMD_PREFIX "CMD"
-#define ARGS_PREFIX "ARGS"
-#define TTL_PREFIX "TTL"
-
 //
 // Key-Value Transport Protocol Header
 //
@@ -52,7 +41,7 @@ namespace kvtp {
         std::string key;
 
         // arguments
-        std::string args;
+        std::vector<std::string> args;
 
         // time to live
         int64_t ttl;

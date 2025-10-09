@@ -20,7 +20,7 @@ Body                ...... Body
 ```
 
 ### Body
-Body is squence of bytes, body may container multiple items
+Body is squence of bytes, body may contain multiple items
 
 #### item format
 - Item header: fixed 4 bytes, indicate the item length in terms of bytes

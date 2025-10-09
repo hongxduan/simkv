@@ -6,25 +6,27 @@
 #include <sstream>
 #include "request.h"
 
+#include "kvtp.h"
 #include "response.h"
 #include "../util/byte_util.h"
+#include "../util/string_util.h"
 
 #define KEY_WIDTH 2 // bytes of key
 
 kvtp::KvtpRequest kvtp::decode_request(std::vector<BYTE> raw_req) {
-    // set initial value is important, or read dirty memroy
+    // set initial value is important, or read dirty memory
     kvtp::KvtpRequest kvtp_req = {
         "",
         "",
         "",
-        "",
+        {},
         -1, //
         {},
         false
     };
 
     std::string raw_str = std::string(raw_req.begin(), raw_req.end());
-    std::stringstream stream(raw_str);
+    std::stringstream ss_raw(raw_str);
     std::string tmp;
     size_t line_num = 0;
     size_t header_size = 0;
@@ -32,7 +34,7 @@ kvtp::KvtpRequest kvtp::decode_request(std::vector<BYTE> raw_req) {
     //
     // decode header
     //
-    while (std::getline(stream, tmp, LINE_FEED)) {
+    while (std::getline(ss_raw, tmp, LINE_FEED)) {
         // accumulate header size
         header_size += tmp.size();
         header_size += 1; // ending '\0'
@@ -47,12 +49,14 @@ kvtp::KvtpRequest kvtp::decode_request(std::vector<BYTE> raw_req) {
             }
             // std::cout << tmp << std::endl;
 
+            // split each header line by colon(:)
+            //  ARGS: xx xx
             std::stringstream ss_line(tmp);
             std::string part;
             std::string head_key, head_val;
             size_t part_index = 0;
             //
-            // split comma seperated header key:val
+            // split colon seperated header key:val
             //
             while (std::getline(ss_line, part, COLON)) {
                 if (part_index == 0) {
@@ -71,7 +75,12 @@ kvtp::KvtpRequest kvtp::decode_request(std::vector<BYTE> raw_req) {
             } else if (head_key == KEY_PREFIX) {
                 kvtp_req.key = head_val;
             } else if (head_key == ARGS_PREFIX) {
-                kvtp_req.args = head_val;
+                std::stringstream ss_args(head_val);
+                std::string arg;
+                while (std::getline(ss_args, arg, SPACE)) {
+                    kvtp_req.args.push_back(util::trim(arg));
+                }
+                //kvtp_req.args = head_val;
             } else if (head_key == TTL_PREFIX) {
                 try {
                     int64_t ttl = std::stoll(head_val.c_str(), NULL, 10);

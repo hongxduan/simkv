@@ -8,6 +8,8 @@
 #define CRC16_POLY 0x8005
 
 namespace util {
+    std::string to_upper(std::string str);
+
     std::string trim_left(const std::string &str);
 
     std::string trim_right(const std::string &str);

@@ -10,9 +10,10 @@
 #include "db_executor.h"
 #include "exec_message.h"
 #include "../db/db.h"
+#include "../kvtp/kvtp.h"
 #include "../kvtp/request.h"
 #include "../kvtp/response.h"
-#include "../util/crc_util.h"
+#include "../util/string_util.h"
 #include "../util/time_util.h"
 
 class StrExecutor : public DbExecutor {
@@ -41,6 +42,20 @@ protected:
             std::cout << "null" << std::endl;
             result = kvtp::encode_err_response(execmsg::KEY_NOT_FOUND);
             return result;
+        }
+
+        // handle arguments
+        if (kvtp_req.args.size() > 0) {
+            for (auto arg: kvtp_req.args) {
+                // get ttl
+                if (util::to_upper(arg) == ARG_TTL) {
+                    return kvtp::encode_i32_response(value->ttl);
+                }
+                // get and delete
+                else if (util::to_upper(arg) == ARG_DEL) {
+                    // todo
+                }
+            }
         }
 
         // to string
