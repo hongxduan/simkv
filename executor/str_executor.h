@@ -49,7 +49,10 @@ protected:
             for (auto arg: kvtp_req.args) {
                 // get ttl
                 if (util::to_upper(arg) == ARG_TTL) {
-                    return kvtp::encode_i32_response(value->ttl);
+                    auto now = util::ms_now();
+                    auto ttl = (util::based_to_ms(value->ttl) - now) / 1000;
+                    if (ttl < 0) ttl = 0;
+                    return kvtp::encode_i32_response(ttl);
                 }
                 // get and delete
                 else if (util::to_upper(arg) == ARG_DEL) {

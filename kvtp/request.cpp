@@ -47,7 +47,7 @@ kvtp::KvtpRequest kvtp::decode_request(std::vector<BYTE> raw_req) {
             if (tmp == "") {
                 break;
             }
-            // std::cout << tmp << std::endl;
+           // std::cout << tmp << std::endl;
 
             // split each header line by colon(:)
             //  ARGS: xx xx
@@ -100,9 +100,9 @@ kvtp::KvtpRequest kvtp::decode_request(std::vector<BYTE> raw_req) {
     }
 
     //
-    // decode body
-    // body consits of 2 bytes of key lenght,
-    // followed by key bytes, and then body bytes
+    // decode body:
+    //  body consist of 2 bytes of key length,
+    //  followed by key bytes, and then body bytes
     //
     std::vector<uint8_t> body_bytes;
     body_bytes.assign(raw_req.begin() + header_size, raw_req.end());
