@@ -13,7 +13,6 @@
 #include "key.h"
 #include "value.h"
 #include "../inc/type.h"
-#include "../kvtp/request.h"
 
 #define PAGE_NUM 64;
 
@@ -34,6 +33,9 @@ struct Expiration {
 
 class Db {
 public:
+    bool expiration_notified;
+    std::mutex expiration_mutex;
+    std::condition_variable expiration_cv;
     Db();
 
     //
@@ -80,8 +82,9 @@ private:
     std::set<Expiration> expirations;
 };
 
-static std::mutex expiration_mutex;
-static std::condition_variable expiration_cv;
+//bool expiration_notified;
+//std::mutex expiration_mutex;
+//std::condition_variable expiration_cv;
 
 /// task runs on a dedicated thread to purge expired keys
 /// @param db

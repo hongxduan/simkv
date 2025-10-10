@@ -106,8 +106,9 @@ protected:
             db->set_expiration(kvtp_req.key, ttl);
 
             // notify purge expiration thread
-            std::lock_guard<std::mutex> unlock(expiration_mutex);
-            expiration_cv.notify_one();
+            std::lock_guard<std::mutex> lock(db->expiration_mutex);
+            db->expiration_notified = true;
+            db->expiration_cv.notify_all();
         } else {
             if (kvtp_req.ttl == -1) {
                 value->ttl = -1;

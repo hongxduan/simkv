@@ -56,7 +56,7 @@ void Db::del_expiration(std::string key, int64_t ms) {
     this->expirations.erase({key, ms});
 }
 
-std::set<Expiration>* Db::get_expirations() {
+std::set<Expiration> *Db::get_expirations() {
     return &expirations;
 }
 
@@ -68,16 +68,20 @@ Expiration Db::next_expiration() {
 
 void purge_expired_task(Db *db) {
     while (true) {
-        std::unique_lock<std::mutex> lock(expiration_mutex);
         auto ms = purge_expired_keys(db);
         ms = util::based_to_ms(ms);
         auto now = util::ms_now();
 
         // wait until next expiration
         if (ms - now > 0) {
-            expiration_cv.wait_for(lock, std::chrono::milliseconds(ms - now));
+            std::cout << "blocking..." << std::endl;
+            std::unique_lock<std::mutex> lock(db->expiration_mutex);
+            db->expiration_cv.wait_for(lock,
+                                   std::chrono::milliseconds(ms - now),
+                                   [db] { return db->expiration_notified; });
+            std::cout << "unblocked." << std::endl;
         }
-
+        db->expiration_notified = false; // reset notified to false
         /*
         if (expiration_notified) {
             std::unique_lock<std::mutex> lock(expiration_mutex);
@@ -92,18 +96,16 @@ void purge_expired_task(Db *db) {
 }
 
 int64_t purge_expired_keys(Db *db) {
-
     auto now = util::ms_now();
     auto expirations = db->get_expirations();
     //for (auto it = expirations.begin(); it != db->get_expirations().end(); ++it) {
     auto it = expirations->begin();
     while (it != expirations->end()) {
-        //std::cout << "purge_expired_keys" << it->key << std::endl;
         if (it->key == "") {
             break;
         }
         if (util::based_to_ms(it->ms) < now) {
-            std::cout << "purging: " << it->key << std::endl;
+            std::cout << "purge_expired_keys - purging: " << it->key << std::endl;
 
             // expired
             auto page = db->get_page(it->key);
@@ -129,8 +131,7 @@ int64_t purge_expired_keys(Db *db) {
 
             // erase expiration
             expirations->erase(it++);
-            std::cout << "purged"  << std::endl;
-
+            std::cout << "purge_expired_keys - purged" << std::endl;
         } else {
             return it->ms;
         }
