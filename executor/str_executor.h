@@ -52,10 +52,15 @@ protected:
             for (auto arg: kvtp_req.args) {
                 // get ttl
                 if (util::to_upper(arg) == ARG_TTL) {
+                    // if ttl is -1, then return
+                    if (value->ttl == -1) {
+                        return kvtp::encode_i32_response(value->ttl);
+                    }
+                    // else return now - ttl seconds
                     auto now = util::ms_now();
                     auto ttl = (util::based_to_ms(value->ttl) - now) / 1000;
                     // set ttl to 0 if ttl is negative and not -1
-                    if (ttl < 0 && ttl != -1) ttl = 0;
+                    if (ttl < 0) ttl = 0;
                     return kvtp::encode_i32_response(ttl);
                 }
                 // get and delete
@@ -120,7 +125,6 @@ protected:
 
         // handle ttl and expiration
         // todo: make set_ttl a method
-
         if (kvtp_req.ttl > 0) {
             // delete old expiration *FIRST*
             if (old != nullptr) {
@@ -141,6 +145,7 @@ protected:
             db->expiration_notified = true;
             db->expiration_cv.notify_one();
         } else {
+            std::cout << "req.ttl " << kvtp_req.ttl << std::endl;
             if (kvtp_req.ttl == -1) {
                 value->ttl = -1;
             } else {
