@@ -9,6 +9,7 @@
 #include "command.h"
 #include "db_executor.h"
 #include "exec_message.h"
+#include "response_msg.h"
 #include "../db/db.h"
 #include "../kvtp/kvtp.h"
 #include "../kvtp/request.h"
@@ -45,13 +46,16 @@ protected:
         }
 
         // handle arguments
+        //  -ttl
+        //  -del
         if (kvtp_req.args.size() > 0) {
             for (auto arg: kvtp_req.args) {
                 // get ttl
                 if (util::to_upper(arg) == ARG_TTL) {
                     auto now = util::ms_now();
                     auto ttl = (util::based_to_ms(value->ttl) - now) / 1000;
-                    if (ttl < 0) ttl = 0;
+                    // set ttl to 0 if ttl is negative and not -1
+                    if (ttl < 0 && ttl != -1) ttl = 0;
                     return kvtp::encode_i32_response(ttl);
                 }
                 // get and delete
@@ -61,12 +65,15 @@ protected:
             }
         }
 
-        // to string
-        std::string str_val = *static_cast<std::string *>(value->val);
-
-        // encode kvtp response
-        result = kvtp::encode_str_response(str_val);
-
+        if (value->val != nullptr) {
+            // to string
+            std::string str_val = *static_cast<std::string *>(value->val);
+            // encode kvtp response
+            result = kvtp::encode_str_response(str_val);
+        } else {
+            // todo: delete the key
+            return kvtp::encode_err_response(RM_UNKNOW_ERR);
+        }
         // return
         return result;
     }
@@ -74,33 +81,57 @@ protected:
     std::vector<BYTE> set(kvtp::KvtpRequest kvtp_req, Db *db) {
         std::vector<BYTE> result;
 
+        std::string *val = nullptr;
+        Value *value = nullptr;
+
         // get page
         auto page = db->get_page(kvtp_req.key);
 
         // get old
         auto old = (*page)[kvtp_req.key];
 
-        // create new Valute and set val
-        std::string *val = new std::string();
-        auto value = new Value();
-        value->typ = ValueType::STR;
-        //value.str = std::string(kvtp_req.val.begin(), kvtp_req.val.end());
-        val->assign(kvtp_req.val.begin(), kvtp_req.val.end());
-        value->val = val;
+        // new key
+        if (old == nullptr) {
+            if (kvtp_req.val.size() == 0) {
+                return kvtp::encode_err_response(RM_VALUE_REQUIRED);
+            }
+            val = new std::string();
+            value = new Value();
+            value->typ = ValueType::STR;
+            val->assign(kvtp_req.val.begin(), kvtp_req.val.end());
+            value->val = val;
+            (*page)[kvtp_req.key] = value;
+        }
+        // update key
+        else {
+            value = old;
+            if (kvtp_req.val.size() > 0) {
+                val = static_cast<std::string *>(value->val);
+                val->assign(kvtp_req.val.begin(), kvtp_req.val.end());
+                //value->val = val;
+            } else {
+                // if value not provided, and ttl also not provided
+                // then error
+                if (kvtp_req.ttl < 0) {
+                    return kvtp::encode_err_response(RM_VALUE_REQUIRED);
+                }
+            }
+        }
 
         // handle ttl and expiration
         // todo: make set_ttl a method
 
         if (kvtp_req.ttl > 0) {
+            // delete old expiration *FIRST*
+            if (old != nullptr) {
+                db->del_expiration(kvtp_req.key, old->ttl);
+            }
+
+            // update to new ttl
             auto ttl = util::ms_now();
             ttl = ttl + kvtp_req.ttl * 1000; // to mills
             ttl = util::ms_to_based(ttl);
             value->ttl = ttl; // to based
-
-            // delete old expiration
-            if (old != nullptr) {
-                db->del_expiration(kvtp_req.key, old->ttl);
-            }
 
             // set new expiration
             db->set_expiration(kvtp_req.key, ttl);
@@ -108,7 +139,7 @@ protected:
             // notify purge expiration thread
             std::lock_guard<std::mutex> lock(db->expiration_mutex);
             db->expiration_notified = true;
-            db->expiration_cv.notify_all();
+            db->expiration_cv.notify_one();
         } else {
             if (kvtp_req.ttl == -1) {
                 value->ttl = -1;
@@ -121,7 +152,7 @@ protected:
         //db->get_page[index][kvtp_req.key] = value;
         //db->set(index, kvtp_req.key, value);
 
-        (*page)[kvtp_req.key] = value;
+        //(*page)[kvtp_req.key] = value;
 
         // encode kvtp response
         result = kvtp::encode_i32_response(1);

@@ -53,7 +53,9 @@ void Db::set_expiration(std::string key, int64_t ms) {
 }
 
 void Db::del_expiration(std::string key, int64_t ms) {
-    this->expirations.erase({key, ms});
+    if (const auto it = this->expirations.find({key, ms}); it!=this->expirations.end()) {
+        this->expirations.erase(it);
+    }
 }
 
 std::set<Expiration> *Db::get_expirations() {

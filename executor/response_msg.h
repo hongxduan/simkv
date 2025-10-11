@@ -1,0 +1,18 @@
+//
+// Created by HongXing on 11/10/25.
+//
+
+#ifndef SIMKV_RESPONSE_MSG_H
+#define SIMKV_RESPONSE_MSG_H
+
+
+#define RM_OK "OK"
+#define RM_ERR "ERR"
+#define RM_UNKNOW_ERR "UNKNOW_ERR"
+#define RM_KEY_NOT_FOUND "KEY_NOT_FOUND"
+#define RM_INVALID_CMD "INVALID_CMD"
+#define RM_VALUE_REQUIRED "VALUE_REQUIRED"
+
+#define RM_KVTP_FMT_ERR "KVTP_FMT_ERR"
+
+#endif //SIMKV_RESPONSE_MSG_H
